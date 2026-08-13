@@ -80,31 +80,31 @@ $$\implies \text{Cần một hệ thống lưu lịch sử minh bạch, hỗ tr�
 ### 2.1. Phân tán (DVCS) và Tập trung (CVCS)
 
 ```mermaid
-flowchart TD
-    subgraph CVCS ["Mô hình tập trung (CVCS - SVN, Perforce)"]
-        CentralServer["Server Trung Tâm\n(Chứa toàn bộ Lịch sử)"]
-        DevA1["Máy Dev A\n(Chỉ Working Copy)"] -->|Mỗi thao tác cần mạng| CentralServer
-        DevB1["Máy Dev B\n(Chỉ Working Copy)"] -->|Mỗi thao tác cần mạng| CentralServer
+flowchart LR
+    subgraph CVCS ["Mô hình tập trung (CVCS: SVN, Perforce)"]
+        direction TB
+        Server1["Server Trung Tâm<br/>(Lưu toàn bộ lịch sử)"]
+        ClientA1["Máy Dev A<br/>(Chỉ có Working Copy)"] -->|Cần mạng liên tục| Server1
+        ClientB1["Máy Dev B<br/>(Chỉ có Working Copy)"] -->|Cần mạng liên tục| Server1
     end
 
-    subgraph DVCS ["Mô hình phân tán (DVCS - Git)"]
-        RemoteServer["Remote Server (GitHub/GitLab)\n(Đồng bộ chung)"]
-        DevA2["Máy Dev A\n(Full History & Repo)"] <-->|Push / Pull| RemoteServer
-        DevB2["Máy Dev B\n(Full History & Repo)"] <-->|Push / Pull| RemoteServer
-        DevA2 -.->|Làm việc hoàn toàn Offline| DevA2
-        DevB2 -.->|Làm việc hoàn toàn Offline| DevB2
+    subgraph DVCS ["Mô hình phân tán (DVCS: Git)"]
+        direction TB
+        Server2["Remote Server (GitHub/GitLab)<br/>(Trung tâm đồng bộ)"]
+        ClientA2["Máy Dev A<br/>(Bản sao đầy đủ Repo & Lịch sử)"] <-->|Push / Pull| Server2
+        ClientB2["Máy Dev B<br/>(Bản sao đầy đủ Repo & Lịch sử)"] <-->|Push / Pull| Server2
     end
 ```
 
 - **CVCS (Centralized Version Control System - SVN, Perforce):**
   - Chỉ máy chủ trung tâm (Central Server) giữ toàn bộ lịch sử phiên bản.
   - Máy cá nhân chỉ giữ bản mới nhất (*working copy*).
-  - Mọi thao tác xem lịch sử, commit đều bắt buộc phải có kết nối mạng.
+  - Mọi thao tác xem lịch sử, commit đều bắt buộc phải có kết nối mạng tới server.
   - **Điểm chết duy nhất (Single Point of Failure):** Nếu server bị sập hoặc hỏng ổ cứng $\rightarrow$ Toàn bộ dự án và lịch sử biến mất.
 
 - **DVCS (Distributed Version Control System - Git, Mercurial):**
   - Mỗi máy của mỗi thành viên đều sở hữu một bản sao đầy đủ (**full copy**) của toàn bộ kho lưu trữ và lịch sử.
-  - Mọi thao tác commit, tạo nhánh, tra cứu log đều diễn ra trên máy cục bộ với tốc độ mili-giây và không cần mạng.
+  - Mọi thao tác commit, tạo nhánh, tra cứu log đều diễn ra trên máy cục bộ với tốc độ cực nhanh và làm việc offline hoàn toàn.
   - Server (GitHub, GitLab, Bitbucket) đóng vai trò là nơi trung chuyển đồng bộ, không phải nơi nắm giữ độc quyền dữ liệu.
 
 #### Bảng so sánh CVCS vs DVCS:
@@ -153,13 +153,12 @@ Mã nguồn trong Git luôn luân chuyển qua 3 trạng thái và 3 vùng dữ 
 
 ```mermaid
 flowchart LR
-    WD["1. Working Directory\n(Mặt bàn làm việc)\nCác file đang sửa"]
-    SA["2. Staging Area (Index)\n(Hộp chuẩn bị đóng gói)\nCác file đã chọn lọc"]
-    RP["3. Git Repository\n(Kho lưu trữ vĩnh viễn .git)\nCác commit snapshot"]
+    WD["1. Working Directory<br/>(Mặt bàn làm việc)<br/>File đang chỉnh sửa"]
+    SA["2. Staging Area (Index)<br/>(Hộp chuẩn bị đóng gói)<br/>File đã chọn lọc"]
+    RP["3. Git Repository (.git)<br/>(Kho lưu trữ vĩnh viễn)<br/>Commit snapshots"]
 
     WD -->|git add| SA
     SA -->|git commit| RP
-    RP -->|git checkout / restore| WD
 ```
 
 | Vùng dữ liệu | Bản chất & Vai trò | Lệnh tương tác chính |
@@ -177,18 +176,22 @@ Tất cả mọi thứ trong Git (tệp, thư mục, phiên bản, nhãn) đều
 ```mermaid
 graph TD
     subgraph CommitObject ["Commit Object (Ảnh chụp hoàn chỉnh)"]
-        C["Commit Hash: 9a3f...\nTree: a1b2...\nParent: 5e6d...\nAuthor: Dev\nMessage: Initial"]
+        C["Commit Hash: 9a3f...<br/>Tree: a1b2...<br/>Parent: 5e6d...<br/>Author: Dev<br/>Message: Initial"]
     end
 
     subgraph RootTree ["Tree Object (Thư mục gốc)"]
         T1["Tree: a1b2..."]
-        T1 -->|README.md| B1["Blob: 4c3d... (Nội dung README)"]
-        T1 -->|src/| T2["Tree: e8f9... (Thư mục src/)"]
+        B1["Blob: 4c3d...<br/>(File: README.md)"]
+        T2["Tree: e8f9...<br/>(Thư mục: src/)"]
+        T1 --> B1
+        T1 --> T2
     end
 
     subgraph SubTree ["Tree Object (Thư mục con src/)"]
-        T2 -->|main.py| B2["Blob: 1a2b... (Nội dung main.py)"]
-        T2 -->|utils.py| B3["Blob: 7f8a... (Nội dung utils.py)"]
+        B2["Blob: 1a2b...<br/>(File: main.py)"]
+        B3["Blob: 7f8a...<br/>(File: utils.py)"]
+        T2 --> B2
+        T2 --> B3
     end
 
     C --> T1
@@ -211,14 +214,15 @@ graph TD
 > *Ví dụ:* Nếu các commit là các bức ảnh nối tiếp nhau trên cuộn phim, thì **HEAD** chính là ngón tay của bạn đang chỉ vào tấm ảnh nào trên cuộn phim ấy.
 
 ```mermaid
-graph LR
+graph TD
     subgraph NormalState ["Trạng thái bình thường"]
-        HEAD1[HEAD] --> MainBranch[Branch: main] --> CommitA["Commit C3 (Mới nhất)"]
+        HEAD1["HEAD"] --> MainBranch["Branch: main"]
+        MainBranch --> CommitA["Commit C3 (Mới nhất)"]
     end
 
     subgraph DetachedState ["Trạng thái Detached HEAD"]
-        HEAD2[HEAD] --> CommitB["Commit C1 (Trỏ thẳng vào hash)"]
-        MainBranch2[Branch: main] --> CommitC["Commit C3"]
+        HEAD2["HEAD"] --> CommitB["Commit C1 (Trỏ thẳng vào Hash)"]
+        MainBranch2["Branch: main"] --> CommitC["Commit C3"]
     end
 ```
 
@@ -237,11 +241,11 @@ gitGraph
     commit id: "C2"
     branch feature
     checkout feature
-    commit id: "C3 (Feature)"
-    commit id: "C4 (Feature)"
+    commit id: "C3-feat"
+    commit id: "C4-feat"
     checkout main
-    commit id: "C5 (Hotfix)"
-    merge feature id: "C6 (Merge Commit)"
+    commit id: "C5-hotfix"
+    merge feature id: "C6-merge"
 ```
 
 - **Có hướng (Directed):** Mỗi commit chỉ biết và trỏ ngược về (các) commit cha của nó, không trỏ tới tương lai.
@@ -267,11 +271,9 @@ git clone <url-repository>
 ### 4.2. Quản lý thay đổi
 
 ```mermaid
-flowchart TD
-    A["File chưa theo dõi (Untracked) / Đã sửa (Modified)"] -->|git add| B["Đã đưa vào vùng chuẩn bị (Staged)"]
-    B -->|git commit| C["Đã lưu vĩnh viễn vào Repo (Committed)"]
-    A -->|git stash| D["Ngăn kéo tạm thời (Stash Stack)"]
-    D -->|git stash pop| A
+flowchart LR
+    A["File chưa theo dõi / Đã sửa<br/>(Untracked / Modified)"] -->|git add| B["Đã đưa vào vùng chuẩn bị<br/>(Staged)"]
+    B -->|git commit| C["Đã lưu vĩnh viễn vào Repo<br/>(Committed)"]
 ```
 
 | Lệnh | Chức năng & Bản chất | Cú pháp ví dụ |
@@ -346,18 +348,17 @@ def get_discount():
 #### 4.3.2. Phân biệt Fast-Forward Merge và 3-Way Merge
 
 ```mermaid
-graph TD
-    subgraph FastForward ["1. Fast-Forward Merge (Không commit mới)"]
+flowchart TD
+    subgraph FastForward ["1. Fast-Forward Merge (Chỉ di chuyển con trỏ main)"]
         direction LR
-        FF1["C1"] --> FF2["C2 (main)"] --> FF3["C3 (feat)"]
-        FF_After["Kết quả: main chỉ cần trỏ tới C3"]
+        FF1["C1"] --> FF2["C2"] --> FF3["C3 (feat & main)"]
     end
 
     subgraph ThreeWay ["2. 3-Way Merge (Tạo Merge Commit mới)"]
         direction LR
         Base["C1 (Base)"] --> MainCommit["C2 (main)"]
         Base --> FeatCommit["C3 (feat)"]
-        MainCommit --> MergeCommit["C4 (Merge Commit - 2 Parents)"]
+        MainCommit --> MergeCommit["C4 (Merge Commit)"]
         FeatCommit --> MergeCommit
     end
 ```
@@ -394,27 +395,22 @@ git push origin feature-login
 ### 4.5. Bộ lệnh "Cứu Nguy" & Khôi Phục
 
 ```mermaid
-flowchart LR
-    subgraph WorkingDirectory ["Working Directory"]
-        WD_File["File bị sửa sai"]
+flowchart TD
+    subgraph MucDo1 ["1. Đang ở Working Directory"]
+        WD1["File bị sửa sai"] -->|git restore file| WD2["Khôi phục về trạng thái commit cũ"]
     end
 
-    subgraph StagingArea ["Staging Area"]
-        SA_File["File lỡ git add"]
+    subgraph MucDo2 ["2. Đã lỡ đưa vào Staging Area"]
+        SA1["File đã git add"] -->|git restore --staged file| SA2["Đưa file về lại Working Directory"]
     end
 
-    subgraph LocalRepo ["Local Commit"]
-        C_Local["Commit chưa push"]
+    subgraph MucDo3 ["3. Đã tạo Commit cục bộ (chưa push)"]
+        C1["Commit vừa tạo"] -->|git reset --soft HEAD~1| C2["Lùi 1 commit, giữ nguyên code ở Staging"]
     end
 
-    subgraph RemoteRepo ["Pushed Commit"]
-        C_Remote["Commit đã push lên Remote"]
+    subgraph MucDo4 ["4. Đã push Commit lên Server dùng chung"]
+        R1["Commit lỗi trên Server"] -->|git revert hash| R2["Tạo commit mới đảo ngược thay đổi (An toàn)"]
     end
-
-    WD_File -->|"git restore <file>"| WD_Clean["Trở về trạng thái commit cũ"]
-    SA_File -->|"git restore --staged <file>"| WD_File
-    C_Local -->|"git reset --soft HEAD~1"| SA_File
-    C_Remote -->|"git revert <hash>"| SafeCommit["Commit mới đảo ngược thay đổi"]
 ```
 
 | Tình huống sự cố | Lệnh xử lý | Bản chất bên dưới | Mức độ an toàn |
@@ -469,3 +465,7 @@ flowchart LR
    - Lệnh này viết đè lịch sử trên remote, có thể xóa sạch commit của người khác mà không có cảnh báo.
 
 ---
+
+<div align="center">
+  <sub>Tài liệu được biên soạn phục vụ đào tạo nội bộ và chuẩn hóa quy trình phát triển phần mềm.</sub>
+</div>
