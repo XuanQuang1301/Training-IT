@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker & Docker Compose Training Presentation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-card: #ffffff;
+            --bg-card-border: #e2e8f0;
+            --accent-blue: #2563eb;
+            --accent-cyan: #0284c7;
+            --accent-green: #16a34a;
+            --accent-orange: #ea580c;
+            --accent-red: #dc2626;
+            --text-main: #334155;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --text-dim: #94a3b8;
+            --code-bg: #1e293b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Progress Bar */
+        .progress-container {
+            width: 100%;
+            height: 4px;
+            background: #e2e8f0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 100;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Slide Viewport */
+        .presentation-viewport {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .slide {
+            display: none;
+            width: 100%;
+            max-width: 1150px;
+            min-height: 640px;
+            background: var(--bg-card);
+            border: 1px solid var(--bg-card-border);
+            border-radius: 16px;
+            padding: 2.75rem 3.25rem;
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.06);
+            flex-direction: column;
+            justify-content: flex-start;
+            position: relative;
+            animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px) scale(0.99);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Slide Title & Headers */
+        .slide-header {
+            margin-bottom: 1.75rem;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 0.85rem;
+        }
+
+        .slide-tag {
+            display: inline-flex;
+            align-items: center;
+            font-size: 1.05rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--accent-blue);
+            background: #eff6ff;
+            border: 1px solid #dbeafe;
+            padding: 0.35rem 0.9rem;
+            border-radius: 8px;
+            margin-bottom: 0.65rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            line-height: 1.2;
+            color: var(--text-dark);
+        }
+
+        h2 {
+            font-size: 1.85rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--accent-blue);
+            margin-bottom: 0.75rem;
+        }
+
+        /* Content Formatting */
+        .slide-content {
+            font-size: 1.05rem;
+            line-height: 1.6;
+            color: var(--text-main);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        strong {
+            color: var(--text-dark);
+            font-weight: 700;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        pre {
+            background: var(--code-bg);
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 1.15rem 1.35rem;
+            overflow-x: auto;
+            margin: 0.75rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        pre code {
+            background: none;
+            color: #f8fafc;
+            padding: 0;
+            font-size: 0.92rem;
+            line-height: 1.5;
+        }
+
+        /* Card & Grid Component Styles */
+        .badge-pill {
+            display: inline-block;
+            background: #eff6ff;
+            color: var(--accent-blue);
+            font-size: 0.85rem;
+            font-weight: 800;
+            padding: 0.3rem 0.75rem;
+            border-radius: 9999px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.6rem;
+            border: 1px solid #dbeafe;
+        }
+
+        .badge-pill.green {
+            background: #f0fdf4;
+            color: var(--accent-green);
+            border-color: #bbf7d0;
+        }
+
+        .badge-pill.red {
+            background: #fef2f2;
+            color: var(--accent-red);
+            border-color: #fecaca;
+        }
+
+        .badge-pill.orange {
+            background: #fff7ed;
+            color: var(--accent-orange);
+            border-color: #fed7aa;
+        }
+
+        /* Agenda 2x2 Grid */
+        .agenda-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.25rem;
+            margin-top: 0.5rem;
+        }
+
+        .agenda-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.35rem 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+            transition: all 0.25s ease;
+        }
+
+        .agenda-card:hover {
+            border-color: var(--accent-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.08);
+        }
+
+        .agenda-card h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.4rem;
+        }
+
+        .agenda-card p {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-bottom: 0;
+        }
+
+        /* Generic Grids */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.1rem;
+        }
+
+        .grid-5 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.1rem;
+        }
+
+        .card-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.25rem 1.4rem;
+            transition: all 0.2s ease;
+        }
+
+        .card-box:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        .card-box.white {
+            background: #ffffff;
+        }
+
+        .card-box.blue {
+            border-left: 4px solid var(--accent-blue);
+            background: #ffffff;
+        }
+
+        .card-box.green {
+            border-left: 4px solid var(--accent-green);
+            background: #ffffff;
+        }
+
+        .card-box.red {
+            border-left: 4px solid var(--accent-red);
+            background: #ffffff;
+        }
+
+        .card-box h4 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.4rem;
+        }
+
+        .card-box p {
+            font-size: 0.92rem;
+            color: var(--text-muted);
+            margin-bottom: 0;
+            line-height: 1.5;
+        }
+
+        .quote-box {
+            background: #f0f9ff;
+            border-left: 4px solid var(--accent-cyan);
+            padding: 1.15rem 1.4rem;
+            border-radius: 0 10px 10px 0;
+            font-style: italic;
+            margin-bottom: 1.25rem;
+            color: #0369a1;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        /* Workflow Diagram Component Styles */
+        .workflow-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            width: 100%;
+            margin: 1.25rem 0 1.75rem 0;
+        }
+
+        .workflow-box {
+            flex: 1;
+            max-width: 290px;
+            min-height: 190px;
+            border-radius: 16px;
+            padding: 1.5rem 1.25rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            border: 2px solid transparent;
+            transition: all 0.25s ease;
+        }
+
+        .workflow-box:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.07);
+        }
+
+        .workflow-box.orange {
+            background: #fff7ed;
+            border-color: #ffedd5;
+        }
+
+        .workflow-box.orange h3 {
+            color: #c2410c;
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 0.3rem;
+        }
+
+        .workflow-box.orange .subtitle {
+            color: #ea580c;
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .workflow-box.orange .desc {
+            color: #9a3412;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-bottom: 0;
+        }
+
+        .workflow-box.blue {
+            background: #f0f9ff;
+            border-color: #e0f2fe;
+        }
+
+        .workflow-box.blue h3 {
+            color: #0369a1;
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 0.3rem;
+        }
+
+        .workflow-box.blue .subtitle {
+            color: #0284c7;
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .workflow-box.blue .desc {
+            color: #075985;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-bottom: 0;
+        }
+
+        .workflow-box.green {
+            background: #f0fdf4;
+            border-color: #dcfce7;
+        }
+
+        .workflow-box.green h3 {
+            color: #15803d;
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 0.3rem;
+        }
+
+        .workflow-box.green .subtitle {
+            color: #16a34a;
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .workflow-box.green .desc {
+            color: #166534;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-bottom: 0;
+        }
+
+        .workflow-arrow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .arrow-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #64748b;
+            background: #f1f5f9;
+            padding: 0.25rem 0.65rem;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 0.4rem;
+            white-space: nowrap;
+        }
+
+        .arrow-line {
+            font-size: 1.8rem;
+            color: #94a3b8;
+            line-height: 1;
+        }
+
+        .workflow-summary {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1rem 1.75rem;
+            display: flex;
+            gap: 1.75rem;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+            width: 100%;
+        }
+
+        .workflow-summary p {
+            margin-bottom: 0;
+            font-size: 0.95rem;
+            color: var(--text-dark);
+        }
+
+        /* List Items Stacked as Cards */
+        .card-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.9rem;
+        }
+
+        .card-item {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1.25rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+        }
+
+        .card-item-tag {
+            background: #f1f5f9;
+            color: var(--accent-blue);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 700;
+            padding: 0.35rem 0.65rem;
+            border-radius: 6px;
+            white-space: nowrap;
+            border: 1px solid #e2e8f0;
+        }
+
+        .card-item-body {
+            flex: 1;
+        }
+
+        .card-item-body strong {
+            display: block;
+            font-size: 1.02rem;
+            color: var(--text-dark);
+            margin-bottom: 0.2rem;
+        }
+
+        .card-item-body p {
+            font-size: 0.92rem;
+            color: var(--text-muted);
+            margin-bottom: 0;
+            line-height: 1.45;
+        }
+
+        /* Title Slide Customization */
+        .title-slide {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+        }
+
+        .title-slide h1 {
+            font-size: 3.2rem;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+
+        .title-slide p {
+            font-size: 1.3rem;
+            color: var(--text-muted);
+        }
+
+        /* Bottom Controls Bar */
+        .controls-bar {
+            height: 68px;
+            background: #ffffff;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        .controls-left, .controls-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .btn {
+            background: #f1f5f9;
+            color: var(--text-dark);
+            border: 1px solid #cbd5e1;
+            padding: 0.55rem 1.2rem;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background: var(--accent-blue);
+            color: #ffffff;
+            border-color: var(--accent-blue);
+        }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            background: #f1f5f9;
+            border-color: #e2e8f0;
+            color: var(--text-dim);
+        }
+
+        .slide-counter {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="presentation-viewport">
+
+        <!-- Slide 1: Title -->
+        <div class="slide title-slide active">
+            <span class="badge-pill" style="font-size: 0.85rem; padding: 0.35rem 0.85rem;">HƯỚNG DẪN DOCKER</span>
+            <h1>Hướng Dẫn Docker & Docker Compose</h1>
+            <p>Từ Căn Bản Đến Quản Lý Hệ Thống Đa Container</p>
+        </div>
+
+        <!-- Slide 2: Agenda (Visual Cards Grid) -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2>Tổng Quan Nội Dung</h2>
+            </div>
+            <div class="slide-content">
+                <div class="agenda-grid">
+                    <div class="agenda-card">
+                        <span class="badge-pill">PHẦN 1</span>
+                        <h3>Đặt Vấn Đề</h3>
+                        <p>Thách thức phát triển phần mềm truyền thống & Giới thiệu về Docker.</p>
+                    </div>
+                    <div class="agenda-card">
+                        <span class="badge-pill">PHẦN 2</span>
+                        <h3>Các Khái Niệm Cốt Lõi</h3>
+                        <p>Dockerfile, Image, Container, Trường hợp sử dụng & Docker Volume.</p>
+                    </div>
+                    <div class="agenda-card">
+                        <span class="badge-pill">PHẦN 3</span>
+                        <h3>Vấn Đề Nhiều Container</h3>
+                        <p>Thách thức quản lý và kết nối hệ thống đa dịch vụ phức tạp.</p>
+                    </div>
+                    <div class="agenda-card">
+                        <span class="badge-pill">PHẦN 4</span>
+                        <h3>Docker Compose</h3>
+                        <p>Cấu trúc file YAML, Bộ lệnh quản lý tập trung & Docker Network nội bộ.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Phần 1 Overview Cards -->
+        <div class="slide">
+            <div class="slide-header">
+                <span class="slide-tag">Phần 1</span>
+                <h2>Đặt Vấn Đề</h2>
+            </div>
+            <div class="slide-content">
+                <div class="grid-2" style="margin-top: 1rem;">
+                    <div class="card-box blue" style="padding: 1.75rem;">
+                        <span class="badge-pill">MỤC 1.1</span>
+                        <h3 style="font-size: 1.4rem; color: var(--text-dark); margin-bottom: 0.6rem;">Vấn Đề Thực Tế</h3>
+                        <p style="font-size: 1.02rem; color: var(--text-muted);">Tìm hiểu các thách thức về xung đột môi trường giữa các máy lập trình viên, thiếu sót cấu hình ngầm và chi phí onboarding nhân sự mới.</p>
+                    </div>
+                    <div class="card-box blue" style="padding: 1.75rem;">
+                        <span class="badge-pill">MỤC 1.2</span>
+                        <h3 style="font-size: 1.4rem; color: var(--text-dark); margin-bottom: 0.6rem;">Docker Là Gì?</h3>
+                        <p style="font-size: 1.02rem; color: var(--text-muted);">Định nghĩa nền tảng đóng gói Containerization, triết lý cốt lõi "Build once, run anywhere" và mô hình so sánh thùng container.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: 1.1 Vấn đề thực tế -->
+        <div class="slide">
+            <div class="slide-header">
+                <span class="slide-tag">Phần 1.1</span>
+                <h2>Vấn Đề Thực Tế Trong Phát Triển Truyền Thống</h2>
+            </div>
+            <div class="slide-content">
+                <div class="grid-3" style="margin-top: 0.5rem;">
+                    <div class="card-box red">
+                        <span class="badge-pill red">THÁCH THỨC 1</span>
+                        <h4>Xung Đột Phiên Bản</h4>
+                        <p>Máy Dev A chạy Node 18, Dev B chạy Node 20, Server chạy Node 16 dẫn đến ứng dụng bị lỗi không tương thích khi triển khai.</p>
+                    </div>
+                    <div class="card-box red">
+                        <span class="badge-pill red">THÁCH THỨC 2</span>
+                        <h4>Thiếu Sót Cấu Hình</h4>
+                        <p>Quên cài các gói phụ thuộc ngầm, thiếu biến môi trường (Environment Variables) hoặc sai lệch cấu hình hệ điều hành.</p>
+                    </div>
+                    <div class="card-box red">
+                        <span class="badge-pill red">THÁCH THỨC 3</span>
+                        <h4>Chi Phí Onboarding High</h4>
+                        <p>Lập trình viên mới phải mất từ 1 đến 2 ngày chỉ để cài đặt môi trường DB, Redis, Runtime trước khi gõ được dòng code đầu tiên.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: 1.2 Docker là gì -->
+        <div class="slide">
+            <div class="slide-header">
+                <span class="slide-tag">Phần 1.2</span>
+                <h2>Docker Là Gì?</h2>
+            </div>
+            <div class="slide-content">
+                <div class="quote-box">
+                    <strong>Docker</strong> là nền tảng mở cho phép đóng gói ứng dụng cùng tất cả các thành phần phụ thuộc (mã nguồn, runtime, công cụ hệ thống, thư viện) vào một đơn vị chuẩn hóa gọi là <strong>Container</strong>.
+                </div>
+                <div class="grid-2" style="margin-top: 0.5rem;">
+                    <div class="card-box blue">
+                        <span class="badge-pill">TRIẾT LÝ CỐT LÕI</span>
+                        <h4>Build Once, Run Anywhere</h4>
+                        <p>Đóng gói môi trường một lần duy nhất trên máy Dev và tự tin khởi chạy ở bất kỳ máy chủ nào mà không lo xung đột.</p>
+                    </div>
+                    <div class="card-box blue">
+                        <span class="badge-pill">MÔ HÌNH ẨN DỤ</span>
+                        <h4>Thùng Container Tiêu Chuẩn</h4>
+                        <p>Giống như đóng gói toàn bộ đồ đạc căn phòng vào chiếc thùng container chuẩn hóa, mang tới đâu cũng mở ra sử dụng chính xác y hệt.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Phần 2 Overview Cards Grid -->
+        <div class="slide">
+            <div class="slide-header">
+                <span class="slide-tag">Phần 2</span>
+                <h2>Các Khái Niệm Cốt Lõi (Tổng Quan)</h2>
+            </div>
+            <div class="slide-content">
+                <div class="grid-3" style="margin-bottom: 1rem;">
+                    <div class="card-box white" style="border-top: 3px solid var(--accent-blue);">
+                        <span class="badge-pill">MỤC 2.1</span>
+                        <h4>Dockerfile</h4>
+                        <p>Kịch bản tự động hóa từng bước dựng môi trường ứng dụng.</p>
+                    </div>
+                    <div class="card-box white" style="border-top: 3px solid var(--accent-blue);">
+                        <span class="badge-pill">MỤC 2.2</span>
+                        <h4>Image</h4>
+                        <p>Bản đóng gói chỉ đọc (Read-only) chứa toàn bộ ứng dụng & phụ thuộc.</p>
+                    </div>
+                    <div class="card-box white" style="border-top: 3px solid var(--accent-blue);">
+                        <span class="badge-pill">MỤC 2.3</span>
+                        <h4>Container</h4>
+                        <p>Thực thể đang chạy (Running Instance) cách ly hoàn toàn.</p>
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="card-box white" style="border-top: 3px solid var(--accent-cyan);">
+                        <span class="badge-pill">MỤC 2.4</span>
+                        <h4>Trường Hợp Sử Dụng</h4>
+                        <p>Phân biệt khi nào CẦN và KHÔNG CẦN viết Dockerfile.</p>
+                    </div>
+                    <div class="card-box white" style="border-top: 3px solid var(--accent-cyan);">
+                        <span class="badge-pill">MỤC 2.5</span>
+                        <h4>Docker Volume</h4>
+                        <p>Giải pháp lưu trữ và bảo vệ dữ liệu bền vững tách biệt Container.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: 2.1 Dockerfile Commands -->
+        <div class="slide">
+            <div class="slide-header">
+                <span class="slide-tag">Phần 2.1</span>
+                <h2>Dockerfile — Khái Niệm & Cấu Trúc Lệnh</h2>
+            </div>
+            <div class="slide-content">
+                <p style="margin-bottom: 0.75rem;"><strong>Mục đích:</strong> File văn bản thuần túy chứa chỉ thị tự động dựng môi trường mà không cần gõ từng lệnh trên terminal.</p>
+                <div class="grid-3">
+                    <div class="card-box white">
+                        <code>FROM</code>
+                        <p style="margin-top: 0.4rem;">Chọn Base Image nền tảng (Node, Python, Ubuntu,...).</p>
+                    </div>
+                    <div class="card-box white">
+                        <code>WORKDIR</code>
+                        <p style="margin-top: 0.4rem;">Tạo và chuyển đến thư mục làm việc trong container.</p>
+                    </div>
+                    <div class="card-box white">
+                        <code>COPY</code>
+                        <p style="margin-top: 0.4rem;">Chép file từ máy thật (Host) vào bên trong container.</p>
+                    </div>
+                    <div class="card-box white">
+                        <code>RUN</code>
+                        <p style="margin-top: 0.4rem;">Chạy các lệnh cài thư viện (<code>npm install</code>, <code>apt</code>).</p>
+                    </div>
+                    <div class="card-box white">
+                        <code>EXPOSE</code>
+                        <p style="margin-top: 0.4rem;">Khai báo cổng (Port) mà ứng dụng sẽ lắng nghe.</p>
+                    </div>
+                    <div class="card-box white">
+                        <code>CMD</code>
+                        <p style="margin-top: 0.4rem;">Lệnh mặc định khởi chạy ứng dụng khi container bật.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: 2.1 Dockerfile Example -->
+        <div class="slide">
+            <div class="slide-header">
+                <span class="slide-tag">Phần 2.1</span>
+                <h2>Dockerfile — Ví Dụ Minh Họa</h2>
+            </div>
+            <div class="slide-content">
+<pre><code># Bước 1: Mượn môi trường có sẵn Node.js 18
+FROM node:18-alpine
+
+# Bước 2: Tạo thư mục /app trong container để chứa code
+WORKDIR /app
+
+# Bước 3: Copy file khai báo thư viện và tải về
+COPY package*.json ./
+RUN npm install
+
+# Bước 4: Copy toàn bộ code từ máy thật vào thư mục /app
+COPY . .
+
+# Bước 5: Khai báo cổng 3000 và lệnh khởi chạy
+EXPOSE 3000
+CMD ["node", "server.js"]</code></pre>
+            </div>
+        </div>
+
+        <!-- Slide 9: 2.2 Image -->
+        <div class="slide">
+            <div class="slide-header">
+                <span class="slide-tag">Phần 2.2</span>
+                <h2>Image — Bản Đóng Gói Chỉ Đọc</h2>
+            </div>
+            <div class="slide-content">
+                <p><strong>Mục đích:</strong> Là sản phẩm tạo ra sau khi Docker thực thi xong <code>Dockerfile</code>, chứa toàn bộ mã nguồn, thư viện, runtime & tools.</p>
+                <div class="grid-2" style="margin-top: 1rem;">
+                    <div class="card-box blue" style="padding: 1.5rem;">
+                        <span class="badge-pill">ĐẶC ĐIỂM 1</span>
+                        <h4 style="font-size: 1.15rem; margin-bottom: 0.5rem;">Read-only (Chỉ Đọc)</h4>
+                        <p style="font-size: 0.98rem; line-height: 1.55;">Không ai sửa đổi trực tiếp vào Image được. Nó giống như một file nén <code>.zip</code> đã đóng băng hoàn toàn dữ liệu ban đầu.</p>
+                    </div>
+                    <div class="card-box blue" style="padding: 1.5rem;">
+                        <span class="badge-pill">ĐẶC ĐIỂM 2</span>
+                        <h4 style="font-size: 1.15rem; margin-bottom: 0.5rem;">Chia Sẻ Dễ Dàng</h4>
+                        <p style="font-size: 0.98rem; line-height: 1.55;">Có thể đẩy lên Docker Hub để đồng nghiệp kéo về khởi chạy ngay lập tức mà không lo lỗi khác biệt hệ điều hành.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: 2.2 Image Usage -->
+        <div class="slide">
+            <div class="slide-header">
+                <span class="slide-tag">Phần 2.2</span>
+                <h2>Image — Các Lệnh Quản Lý Cơ Bản</h2>
+            </div>
+            <div class="slide-content">
+                <div class="card-list">
+                    <div class="card-item">
+                        <div class="card-item-tag">BUILD</div>
+                        <div class="card-item-body">
+                            <strong>Tạo Image từ Dockerfile</strong>
+                            <p>Lệnh: <code>docker build -t my-web-app:v1 .</code></p>
+                        </div>
+                    </div>
+                    <div class="card-item">
+                        <div class="card-item-tag">LIST</div>
+                        <div class="card-item-body">
+                            <strong>Xem danh sách Image trên máy</strong>
+                            <p>Lệnh: <code>docker images</code></p>
+                        </div>
+                    </div>
+                    <div class="card-item">
+                        <div class="card-item-tag">REMOVE</div>
+                        <div class="card-item-body">
+                            <strong>Xóa Image không dùng</strong>
+                            <p>Lệnh: <code>docker rmi my-web-app:v1</code></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: 2.3 Container -->
+        <div class="slide">
+            <div class="slide-header">
+                <span class="slide-tag">Phần 2.3</span>
+                <h2>Container — Thực Thể Đang Chạy</h2>
+            </div>
+            <div class="slide-content">
+                <div class="grid-2" style="margin-bottom: 1rem;">
+                    <div class="card-box blue">
+                        <span class="badge-pill">KHÁI NIỆM</span>
+                        <h4>Running Instance</h4>
+                        <p>Container là thực thể đang chạy được khởi tạo từ Image. Có CPU, RAM, ổ đĩa và mạng hoàn toàn cách ly.</p>
+                    </div>
+                    <div class="card-box blue">
+                        <span class="badge-pill">KHẢ NĂNG MỞ RỘNG</span>
+                        <h4>1 Image -> N Containers</h4>
+                        <p>Từ 1 Image có thể bật ra 10 hay 1000 Container cùng lúc trên các cổng 3001, 3002, 3003 để chia tải.</p>
+                    </div>
+                </div>
+                <div class="card-box red">
+                    <span class="badge-pill red">CẢNH BÁO LƯU TRỮ</span>
+                    <h4 style="color: var(--accent-red);">Dữ Liệu Tạm Thời (Ephemeral State)</h4>
+                    <p>Khi Container dừng và bị xóa (<code>docker rm</code>), những gì phát sinh trong quá trình chạy sẽ <strong>bị mất vĩnh viễn</strong> (trừ khi dùng Docker Volume).</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: 2.3 Container CLI -->
+        <div class="slide">
+            <div class="slide-header">
+                <span class="slide-tag">Phần 2.3</span>
+                <h2>Container — Các Lệnh Quản Lý Cơ Bản</h2>
+            </div>
+            <div class="slide-content">
+                <p style="margin-bottom: 0.5rem;"><strong>Lệnh khởi chạy từ Image:</strong></p>
+<pre><code>docker run -d -p 8080:3000 --name my-running-app my-web-app:v1</code></pre>
+                <div class="grid-3" style="margin-top: 0.75rem;">
+                    <div class="card-box white">
+                        <code>-d</code>
+                        <p style="margin-top: 0.3rem;">Chạy ngầm trong nền (*Detach mode*).</p>
+                    </div>
+                    <div class="card-box white">
+                        <code>-p 8080:3000</code>
+                        <p style="margin-top: 0.3rem;">Chuyển tiếp cổng Host:Container.</p>
+                    </div>
+                    <div class="card-box white">
+                        <code>--name</code>
+                        <p style="margin-top: 0.3rem;">Đặt tên nhận diện cho container.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13: Workflow Diagram Dockerfile -> Image -> Container -->
+        <div class="slide">
+            <div class="slide-header">
+                <span class="slide-tag">Phần 2.3</span>
+                <h2>Mối Quan Hệ: Dockerfile → Image → Container</h2>
+            </div>
+            <div class="slide-content" style="justify-content: center; align-items: center;">
+                <div class="workflow-container">
+                    <div class="workflow-box orange">
+                        <h3>Dockerfile</h3>
+                        <p class="subtitle">File "công thức"</p>
+                        <p class="desc">Mô tả cài gì, copy gì, chạy gì</p>
+                    </div>
+
+                    <div class="workflow-arrow">
+                        <span class="arrow-label">docker build</span>
+                        <div class="arrow-line">➔</div>
+                    </div>
+
+                    <div class="workflow-box blue">
+                        <h3>Image</h3>
+                        <p class="subtitle">Bản đóng gói tĩnh</p>
+                        <p class="desc">Giống bộ cài đặt sẵn sàng để chạy</p>
+                    </div>
+
+                    <div class="workflow-arrow">
+                        <span class="arrow-label">docker run</span>
+                        <div class="arrow-line">➔</div>
+                    </div>
+
+                    <div class="workflow-box green">
+                        <h3>Container</h3>
+                        <p class="subtitle">Đang chạy thực tế</p>
+                        <p class="desc">(Ứng dụng đang sống)</p>
+                    </div>
+                </div>
+
+                <div class="workflow-summary">
+                    <p>• <strong>Dockerfile</strong> là công thức</p>
+                    <p>• <strong>Image</strong> là bản đóng gói tĩnh</p>
+                    <p>• <strong>Container</strong> là bản chạy thực tế của Image</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13: 2.4 When Dockerfile -->
+        <div class="slide">
+            <div class="slide-header">
+                <span class="slide-tag">Phần 2.4</span>
+                <h2>Khi Nào Cần Có Dockerfile?</h2>
+            </div>
+            <div class="slide-content">
+                <div class="grid-2">
+                    <div class="card-box green">
+                        <span class="badge-pill green">TRƯỜNG HỢP CẦN DOCKERFILE</span>
+                        <div class="card-list" style="margin-top: 0.5rem;">
+                            <div style="font-size: 0.95rem; color: var(--text-dark);">• Tự đóng gói mã nguồn app (Node.js, Spring Boot, React).</div>
+                            <div style="font-size: 0.95rem; color: var(--text-dark);">• Tùy biến sâu Image (cài <code>ffmpeg</code>, sửa <code>nginx.conf</code>).</div>
+                            <div style="font-size: 0.95rem; color: var(--text-dark);">• Tự động hóa build trong quy trình CI/CD.</div>
+                        </div>
+                    </div>
+                    <div class="card-box red">
+                        <span class="badge-pill red">TRƯỜNG HỢP KHÔNG CẦN</span>
+                        <div class="card-list" style="margin-top: 0.5rem;">
+                            <div style="font-size: 0.95rem; color: var(--text-dark);">• Dùng dịch vụ có sẵn: MySQL, Postgres, Redis, Nginx.</div>
+                            <div style="font-size: 0.95rem; color: var(--text-muted); margin-top: 0.4rem;"><em>Lý do:</em> Đã có sẵn Official Image trên Docker Hub, chỉ cần kéo về chạy trực tiếp.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 14: 2.5 Docker Volume -->
+        <div class="slide">
+            <div class="slide-header">
+                <span class="slide-tag">Phần 2.5</span>
+                <h2>Docker Volume — Dữ Liệu Bền Vững</h2>
+            </div>
+            <div class="slide-content">
+                <p><strong>Giải pháp:</strong> Tách biệt hoàn toàn phần <strong>Dữ liệu</strong> ra khỏi <strong>Vòng đời của Container</strong>.</p>
+                <div class="grid-2" style="margin-top: 0.5rem;">
+                    <div class="card-box white">
+                        <span class="badge-pill">BƯỚC 1 & 2</span>
+                        <h4>Lưu Trữ Ở Máy Thật</h4>
+                        <p>Volume là thư mục nằm trên máy thật (Host Machine) do Docker quản lý. Data ghi trong container bay thẳng xuống máy thật.</p>
+                    </div>
+                    <div class="card-box white">
+                        <span class="badge-pill">BƯỚC 3 & 4</span>
+                        <h4>An Toàn Tuyệt Đối</h4>
+                        <p>Khi xóa Container, Volume vẫn còn nguyên. Tạo container mới chỉ cần gắn lại Volume cũ, dữ liệu lập tức quay trở lại.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 15: Phần 3 Nhiều Container -->
+        <div class="slide">
+            <div class="slide-header">
+                <span class="slide-tag">Phần 3</span>
+                <h2>Vấn Đề Khi Có Nhiều Container</h2>
+            </div>
+            <div class="slide-content">
+                <div class="grid-3" style="margin-top: 1rem;">
+                    <div class="card-box red">
+                        <span class="badge-pill red">VẤN ĐỀ 1</span>
+                        <h4>Lệnh Chạy Thủ Công Dài</h4>
+                        <p>Chạy từng <code>docker run</code> cho từng container rất dài dòng, khó nhớ và dễ gõ nhầm tham số.</p>
+                    </div>
+                    <div class="card-box red">
+                        <span class="badge-pill red">VẤN ĐỀ 2</span>
+                        <h4>Thứ Tự Khởi Chạy</h4>
+                        <p>Khó kiểm soát thứ tự phụ thuộc (ví dụ: Database phải khởi động và sẵn sàng trước Backend).</p>
+                    </div>
+                    <div class="card-box red">
+                        <span class="badge-pill red">VẤN ĐỀ 3</span>
+                        <h4>Kết Nối Mạng Phức Tạp</h4>
+                        <p>Phức tạp trong việc thiết lập IP và quản lý mạng liên lạc nội bộ giữa các container.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 16: Phần 4 Overview Cards Grid -->
+        <div class="slide">
+            <div class="slide-header">
+                <span class="slide-tag">Phần 4</span>
+                <h2>Docker Compose Là Gì? (Tổng Quan)</h2>
+            </div>
+            <div class="slide-content">
+                <div class="quote-box">
+                    <strong>Docker Compose</strong> là công cụ định nghĩa nhiều container liên quan nhau trong một file YAML duy nhất (<code>docker-compose.yml</code>), rồi khởi chạy tất cả chỉ bằng <strong>1 lệnh duy nhất</strong>.
+                </div>
+                <div class="grid-3" style="margin-top: 0.5rem;">
+                    <div class="card-box white" style="border-top: 3px solid var(--accent-blue);">
+                        <span class="badge-pill">MỤC 4.1</span>
+                        <h4>Cấu Trúc File YAML</h4>
+                        <p>Khai báo cấu hình tập trung cho toàn bộ cụm dịch vụ.</p>
+                    </div>
+                    <div class="card-box white" style="border-top: 3px solid var(--accent-blue);">
+                        <span class="badge-pill">MỤC 4.2</span>
+                        <h4>Bộ Lệnh Điều Khiển</h4>
+                        <p>Bật, tắt, theo dõi log cụm dịch vụ chỉ với 1 lệnh đơn giản.</p>
+                    </div>
+                    <div class="card-box white" style="border-top: 3px solid var(--accent-blue);">
+                        <span class="badge-pill">MỤC 4.3</span>
+                        <h4>Docker Network Nội Bộ</h4>
+                        <p>Các container tự động giao tiếp qua tên Service Name.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 17: 4.1 Compose Structure -->
+        <div class="slide">
+            <div class="slide-header">
+                <span class="slide-tag">Phần 4.1</span>
+                <h2>Cấu Trúc File docker-compose.yml Mẫu</h2>
+            </div>
+            <div class="slide-content">
+                <div class="grid-3">
+                    <div class="card-box white">
+                        <code>version</code>
+                        <p style="margin-top: 0.3rem;">Phiên bản cú pháp Compose.</p>
+                    </div>
+                    <div class="card-box white">
+                        <code>services</code>
+                        <p style="margin-top: 0.3rem;">Danh sách dịch vụ cần chạy (app, db, redis).</p>
+                    </div>
+                    <div class="card-box white">
+                        <code>ports</code>
+                        <p style="margin-top: 0.3rem;">Ánh xạ cổng giữa Host và Container.</p>
+                    </div>
+                    <div class="card-box white">
+                        <code>environment</code>
+                        <p style="margin-top: 0.3rem;">Khai báo các biến môi trường.</p>
+                    </div>
+                    <div class="card-box white">
+                        <code>volumes</code>
+                        <p style="margin-top: 0.3rem;">Gắn kết lưu trữ dữ liệu bền vững.</p>
+                    </div>
+                    <div class="card-box white">
+                        <code>networks</code>
+                        <p style="margin-top: 0.3rem;">Cấu hình mạng nội bộ cụm dịch vụ.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 18: 4.2 Compose Commands -->
+        <div class="slide">
+            <div class="slide-header">
+                <span class="slide-tag">Phần 4.2</span>
+                <h2>Bộ Lệnh Điều Khiển Docker Compose Cơ Bản</h2>
+            </div>
+            <div class="slide-content">
+                <div class="card-list">
+                    <div class="card-item">
+                        <div class="card-item-tag">docker compose up -d</div>
+                        <div class="card-item-body">
+                            <strong>Khởi chạy toàn bộ cụm dịch vụ ngầm trong nền</strong>
+                        </div>
+                    </div>
+                    <div class="card-item">
+                        <div class="card-item-tag">docker compose ps</div>
+                        <div class="card-item-body">
+                            <strong>Xem trạng thái của các dịch vụ trong cụm</strong>
+                        </div>
+                    </div>
+                    <div class="card-item">
+                        <div class="card-item-tag">docker compose logs -f</div>
+                        <div class="card-item-body">
+                            <strong>Xem log thời gian thực của toàn bộ cụm</strong>
+                        </div>
+                    </div>
+                    <div class="card-item">
+                        <div class="card-item-tag">docker compose down</div>
+                        <div class="card-item-body">
+                            <strong>Tắt và hạ toàn bộ cụm dịch vụ</strong>
+                        </div>
+                    </div>
+                    <div class="card-item">
+                        <div class="card-item-tag">docker compose down -v</div>
+                        <div class="card-item-body">
+                            <strong>Tắt cụm và XÓA LUÔN Volume (Reset sạch dữ liệu)</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 19: 4.3 Docker Network -->
+        <div class="slide">
+            <div class="slide-header">
+                <span class="slide-tag">Phần 4.3</span>
+                <h2>Cơ Chế Docker Network Nội Bộ</h2>
+            </div>
+            <div class="slide-content">
+                <div class="grid-2" style="margin-top: 0.5rem;">
+                    <div class="card-box blue" style="padding: 1.5rem;">
+                        <span class="badge-pill">MẠNG NỘI BỘ</span>
+                        <h4>Tự Động Kết Nối</h4>
+                        <p style="font-size: 0.98rem; line-height: 1.55;">Các container trong cùng <code>docker-compose.yml</code> tự động tham gia vào chung một mạng nội bộ cách ly an toàn.</p>
+                    </div>
+                    <div class="card-box blue" style="padding: 1.5rem;">
+                        <span class="badge-pill">SERVICE NAME DNS</span>
+                        <h4>Gọi Qua Tên Service</h4>
+                        <p style="font-size: 0.98rem; line-height: 1.55;">Backend gọi sang Database qua hostname <code>db</code> thay vì IP động. DNS nội bộ tự động phân giải địa chỉ chính xác.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 20: Summary & Q&A -->
+        <div class="slide title-slide">
+            <span class="badge-pill" style="font-size: 0.85rem; padding: 0.35rem 0.85rem;">Tổng Kết</span>
+            <h1 style="font-size: 2.8rem; margin-bottom: 0.75rem;">Cảm Ơn Bạn Đã Theo Dõi!</h1>
+            <p>Q&A — Thảo Luận & Giải Đáp Thắc Mắc</p>
+        </div>
+
+    </div>
+
+    <!-- Controls Bar -->
+    <div class="controls-bar">
+        <div class="controls-left">
+            <button class="btn" id="prevBtn">← Trước</button>
+            <button class="btn" id="nextBtn">Sau →</button>
+            <span class="slide-counter" id="slideCounter">Slide 1 / 20</span>
+        </div>
+        <div class="controls-right">
+            <button class="btn" id="fullscreenBtn">Fullscreen ⛶</button>
+        </div>
+    </div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const slideCounter = document.getElementById('slideCounter');
+        const progressBar = document.getElementById('progressBar');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+
+        let currentSlide = 0;
+        const totalSlides = slides.length;
+
+        function updateSlide() {
+            slides.forEach((slide, index) => {
+                slide.classList.toggle('active', index === currentSlide);
+            });
+
+            slideCounter.textContent = `Slide ${currentSlide + 1} / ${totalSlides}`;
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            progressBar.style.width = `${progress}%`;
+
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === totalSlides - 1;
+        }
+
+        prevBtn.addEventListener('click', () => {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateSlide();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                updateSlide();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ' || e.key === 'PageDown') {
+                if (currentSlide < totalSlides - 1) {
+                    currentSlide++;
+                    updateSlide();
+                }
+            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') {
+                if (currentSlide > 0) {
+                    currentSlide--;
+                    updateSlide();
+                }
+            } else if (e.key === 'Home') {
+                currentSlide = 0;
+                updateSlide();
+            } else if (e.key === 'End') {
+                currentSlide = totalSlides - 1;
+                updateSlide();
+            }
+        });
+
+        fullscreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    alert(`Không thể bật chế độ toàn màn hình: ${err.message}`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        });
+
+        updateSlide();
+    </script>
+</body>
+</html>

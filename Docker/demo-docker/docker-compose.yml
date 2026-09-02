@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  backend:
+    # Build Docker Image từ Dockerfile ở thư mục hiện tại
+    build: .
+    ports:
+      - "8080:3000"
+    # Biến môi trường chuỗi kết nối PostgreSQL truyền vào container backend
+    # Tên domain 'db' chính là tên service db bên dưới (Docker Compose tự động tạo Network chung)
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/demodb
+    # Thiết lập phụ thuộc: Đảm bảo container 'db' được khởi chạy trước container 'backend'
+    depends_on:
+      - db
+
+  db:
+    image: postgres:16-alpine
+    # Map port PostgreSQL của host vào port container (5432:5432)
+    ports:
+      - "5432:5432"
+    # Biến môi trường thiết lập user, password và database name ban đầu cho PostgreSQL
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=demodb
+    # Giúp dữ liệu vẫn còn nguyên vẹn khi xóa hoặc khởi động lại container
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+# Khai báo quản lý lưu trữ dữ liệu bền vững
+volumes:
+  postgres-data:
