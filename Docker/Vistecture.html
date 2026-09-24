@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker CLI vs Docker Compose - Blueprint Runtime Architecture</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-blueprint: #f0fdf4;
+            --grid-line: rgba(16, 185, 129, 0.12);
+            --border-color: #cbd5e1;
+
+            --text-main: #0f172a;
+            --text-muted: #475569;
+
+            /* Node Colors */
+            --green-border: #059669;
+            --green-bg: #ecfdf5;
+            --green-text: #065f46;
+
+            --red-border: #dc2626;
+            --red-bg: #fef2f2;
+            --red-text: #991b1b;
+
+            --purple-border: #7c3aed;
+            --purple-bg: #f5f3ff;
+            --purple-text: #5b21b6;
+
+            --amber-border: #ea580c;
+            --amber-bg: #fff7ed;
+            --amber-text: #9a3412;
+
+            --blue-border: #0284c7;
+            --blue-bg: #f0f9ff;
+            --blue-text: #075985;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            background-color: var(--bg-blueprint);
+            background-image: 
+                linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+                linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: var(--text-main);
+            font-family: 'JetBrains Mono', monospace;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.4;
+        }
+
+        /* Blueprint Header */
+        header {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            border-bottom: 2px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-title-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .header-h1 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.02em;
+        }
+
+        .header-meta {
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+
+        /* Segmented Mode Switcher */
+        .mode-switch-group {
+            background: #ffffff;
+            border: 1.5px solid var(--border-color);
+            padding: 0.25rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .switch-btn {
+            background: transparent;
+            border: none;
+            color: #475569;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .switch-btn:hover { color: #0f172a; }
+
+        .switch-btn.active-cli {
+            background: var(--red-bg);
+            color: var(--red-text);
+            border: 1px solid var(--red-border);
+        }
+
+        .switch-btn.active-compose {
+            background: var(--green-bg);
+            color: var(--green-text);
+            border: 1px solid var(--green-border);
+        }
+
+        .switch-btn.active-side {
+            background: var(--purple-bg);
+            color: var(--purple-text);
+            border: 1px solid var(--purple-border);
+        }
+
+        /* Main Workspace Container */
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* Outer Bounding Box Container */
+        .boundary-box {
+            background: rgba(255, 255, 255, 0.85);
+            border: 2px dashed #ea580c;
+            border-radius: 14px;
+            padding: 1.75rem 1.5rem 1.5rem 1.5rem;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+        }
+
+        .boundary-box.net-box {
+            border-color: #0284c7;
+            background: rgba(240, 249, 255, 0.5);
+        }
+
+        .boundary-box.cli-net {
+            border-color: #dc2626;
+            background: rgba(254, 242, 242, 0.5);
+        }
+
+        .boundary-label {
+            position: absolute;
+            top: -12px;
+            left: 16px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 0.12rem 0.6rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background: #ffffff;
+            border: 1px solid currentColor;
+        }
+
+        .boundary-label.host { color: #ea580c; }
+        .boundary-label.net { color: #0284c7; }
+        .boundary-label.cli-net { color: #dc2626; }
+
+        /* Nodes Row Grid */
+        .nodes-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        /* Crisp Architecture Node Box */
+        .arch-node {
+            background: #ffffff;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.85rem 1.1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            min-width: 190px;
+            position: relative;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+            transition: all 0.2s ease;
+        }
+
+        .arch-node:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+        }
+
+        .arch-node.green { border-color: var(--green-border); background: var(--green-bg); }
+        .arch-node.red { border-color: var(--red-border); background: var(--red-bg); }
+        .arch-node.purple { border-color: var(--purple-border); background: var(--purple-bg); }
+        .arch-node.amber { border-color: var(--amber-border); background: var(--amber-bg); }
+        .arch-node.blue { border-color: var(--blue-border); background: var(--blue-bg); }
+
+        .node-top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .node-status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .node-tag {
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .node-h3 {
+            font-size: 0.92rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .node-sub {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+
+        .node-code {
+            font-size: 0.7rem;
+            font-weight: 700;
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            margin-top: 0.2rem;
+            width: fit-content;
+        }
+
+        /* Labeled Flow Connector Arrow */
+        .path-link {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.15rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #64748b;
+        }
+
+        .link-text {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.68rem;
+            white-space: nowrap;
+        }
+
+        .link-arrow {
+            font-size: 1.1rem;
+        }
+
+        /* Code Command Snippet Block */
+        .cmd-block {
+            background: #0f172a;
+            border: 1px solid #1e293b;
+            border-radius: 8px;
+            padding: 0.85rem 1.1rem;
+            color: #38bdf8;
+            font-size: 0.76rem;
+            overflow-x: auto;
+            white-space: pre;
+            line-height: 1.45;
+        }
+
+        /* Side-by-Side Blueprint Grid */
+        .side-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .side-grid { grid-template-columns: 1fr; }
+        }
+
+        /* Summary Matrix Table */
+        .matrix-card {
+            background: #ffffff;
+            border: 1.5px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+
+        .matrix-table th, .matrix-table td {
+            padding: 0.75rem 0.9rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .matrix-table th {
+            background: #f8fafc;
+            font-weight: 800;
+        }
+
+        .matrix-table td.criteria {
+            font-weight: 800;
+            width: 200px;
+        }
+
+        .matrix-table td.cli-cell { background: #fef2f2; color: #dc2626; font-weight: 700; }
+        .matrix-table td.compose-cell { background: #ecfdf5; color: #059669; font-weight: 700; }
+    </style>
+</head>
+<body>
+
+    <!-- Blueprint Header -->
+    <header>
+        <div class="header-title-group">
+            <div class="header-h1">Docker Runtime Architecture Blueprint</div>
+            <div class="header-meta">Authored for demo-docker-cli vs demo-docker • Node.js + Postgres microservices</div>
+        </div>
+
+        <!-- Mode Switcher -->
+        <div class="mode-switch-group">
+            <button class="switch-btn active-cli" id="btn-cli" onclick="switchMode('cli')">
+                🔴 Luồng 1: CLI (Không Compose)
+            </button>
+            <button class="switch-btn" id="btn-compose" onclick="switchMode('compose')">
+                🟢 Luồng 2: Docker Compose
+            </button>
+            <button class="switch-btn" id="btn-side" onclick="switchMode('side')">
+                ⚡ Luồng 3: So Sánh Song Song
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main id="mainWorkspace">
+        <!-- Rendered dynamically by JS -->
+    </main>
+
+    <script>
+        let currentMode = 'cli';
+
+        function switchMode(mode) {
+            currentMode = mode;
+            document.getElementById('btn-cli').className = mode === 'cli' ? 'switch-btn active-cli' : 'switch-btn';
+            document.getElementById('btn-compose').className = mode === 'compose' ? 'switch-btn active-compose' : 'switch-btn';
+            document.getElementById('btn-side').className = mode === 'side' ? 'switch-btn active-side' : 'switch-btn';
+            renderView();
+        }
+
+        function renderView() {
+            const main = document.getElementById('mainWorkspace');
+
+            if (currentMode === 'side') {
+                main.innerHTML = `
+                    <div class="side-grid">
+                        ${renderBlueprintCard('cli')}
+                        ${renderBlueprintCard('compose')}
+                    </div>
+                    ${renderMatrixTable()}
+                `;
+            } else if (currentMode === 'cli') {
+                main.innerHTML = renderBlueprintCard('cli') + renderMatrixTable();
+            } else {
+                main.innerHTML = renderBlueprintCard('compose') + renderMatrixTable();
+            }
+        }
+
+        function renderBlueprintCard(type) {
+            if (type === 'cli') {
+                return `
+                    <!-- HOST BOUNDARY BOX - CLI -->
+                    <div class="boundary-box">
+                        <span class="boundary-label host">HOST MACHINE (KHÔNG DÙNG COMPOSE)</span>
+
+                        <div class="nodes-row">
+                            <div class="arch-node red">
+                                <div class="node-top-bar">
+                                    <span class="node-status-dot"></span>
+                                    <span class="node-tag">TERMINAL</span>
+                                </div>
+                                <div class="node-h3">CLI Commands</div>
+                                <div class="node-sub">5 Lệnh thủ công</div>
+                                <div class="node-code">docker run...</div>
+                            </div>
+
+                            <div class="path-link">
+                                <span class="link-text">1. network create</span>
+                                <span class="link-arrow">➡️</span>
+                            </div>
+
+                            <!-- CUSTOM NET BOUNDARY BOX -->
+                            <div class="boundary-box cli-net" style="flex: 1; padding: 1.25rem 1rem 1rem 1rem;">
+                                <span class="boundary-label cli-net">CUSTOM NETWORK: demo-net</span>
+
+                                <div class="nodes-row">
+                                    <div class="arch-node purple">
+                                        <div class="node-top-bar">
+                                            <span class="node-status-dot"></span>
+                                            <span class="node-tag">DATABASE</span>
+                                        </div>
+                                        <div class="node-h3">demo-db</div>
+                                        <div class="node-sub">postgres:16</div>
+                                        <div class="node-code">Port 5433:5432</div>
+                                    </div>
+
+                                    <div class="path-link">
+                                        <span class="link-text">2. DNS: demo-db:5432</span>
+                                        <span class="link-arrow">⬅️</span>
+                                    </div>
+
+                                    <div class="arch-node green">
+                                        <div class="node-top-bar">
+                                            <span class="node-status-dot"></span>
+                                            <span class="node-tag">BACKEND</span>
+                                        </div>
+                                        <div class="node-h3">backend-app</div>
+                                        <div class="node-sub">Node.js API</div>
+                                        <div class="node-code">Port 8081:3000</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="path-link">
+                                <span class="link-text">3. mount volume</span>
+                                <span class="link-arrow">➡️</span>
+                            </div>
+
+                            <div class="arch-node amber">
+                                <div class="node-top-bar">
+                                    <span class="node-status-dot"></span>
+                                    <span class="node-tag">STORAGE</span>
+                                </div>
+                                <div class="node-h3">Volume: pg-data</div>
+                                <div class="node-sub">Tự tạo thủ công</div>
+                                <div class="node-code">/var/lib/postgresql</div>
+                            </div>
+                        </div>
+
+                        <div class="cmd-block"># LỆNH THỦ CÔNG KHÔNG DÙNG COMPOSE:
+docker network create demo-net
+docker volume create pg-data
+docker run -d --name demo-db --net demo-net -v pg-data:... -p 5433:5432 postgres:16-alpine
+docker build -t backend-app:v1 .
+docker run -d --name backend-app --net demo-net -p 8081:3000 -e DATABASE_URL=... backend-app:v1</div>
+                    </div>
+                `;
+            } else {
+                return `
+                    <!-- HOST BOUNDARY BOX - COMPOSE -->
+                    <div class="boundary-box">
+                        <span class="boundary-label host" style="color: #059669;">HOST MACHINE (DÙNG DOCKER COMPOSE)</span>
+
+                        <div class="nodes-row">
+                            <div class="arch-node green">
+                                <div class="node-top-bar">
+                                    <span class="node-status-dot"></span>
+                                    <span class="node-tag">DECLARATIVE</span>
+                                </div>
+                                <div class="node-h3">docker-compose.yml</div>
+                                <div class="node-sub">Khai báo Services</div>
+                                <div class="node-code">$ docker compose up -d</div>
+                            </div>
+
+                            <div class="path-link">
+                                <span class="link-text">1. up -d (Auto Create)</span>
+                                <span class="link-arrow">➡️</span>
+                            </div>
+
+                            <!-- AUTOMATED NET BOUNDARY BOX -->
+                            <div class="boundary-box net-box" style="flex: 1; padding: 1.25rem 1rem 1rem 1rem;">
+                                <span class="boundary-label net">COMPOSE NETWORK: demo-docker_default</span>
+
+                                <div class="nodes-row">
+                                    <div class="arch-node purple">
+                                        <div class="node-top-bar">
+                                            <span class="node-status-dot"></span>
+                                            <span class="node-tag">SERVICE DB</span>
+                                        </div>
+                                        <div class="node-h3">db (postgres)</div>
+                                        <div class="node-sub">depends_on</div>
+                                        <div class="node-code">Port 5432:5432</div>
+                                    </div>
+
+                                    <div class="path-link">
+                                        <span class="link-text">2. Auto DNS: db:5432</span>
+                                        <span class="link-arrow">⬅️</span>
+                                    </div>
+
+                                    <div class="arch-node green">
+                                        <div class="node-top-bar">
+                                            <span class="node-status-dot"></span>
+                                            <span class="node-tag">SERVICE APP</span>
+                                        </div>
+                                        <div class="node-h3">backend</div>
+                                        <div class="node-sub">Node.js API</div>
+                                        <div class="node-code">Port 8080:3000</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="path-link">
+                                <span class="link-text">3. Auto Mount</span>
+                                <span class="link-arrow">➡️</span>
+                            </div>
+
+                            <div class="arch-node amber">
+                                <div class="node-top-bar">
+                                    <span class="node-status-dot"></span>
+                                    <span class="node-tag">AUTO VOLUME</span>
+                                </div>
+                                <div class="node-h3">postgres-data</div>
+                                <div class="node-sub">Tự động khởi tạo</div>
+                                <div class="node-code">/var/lib/postgresql</div>
+                            </div>
+                        </div>
+
+                        <div class="cmd-block"># KHỞI CHẠY VÀ DỌN DẸP 1-CLICK VỚI DOCKER COMPOSE:
+$ docker compose up -d      # Bật toàn bộ hệ thống
+$ docker compose down -v    # Dọn dẹp sạch 100%</div>
+                    </div>
+                `;
+            }
+        }
+
+        function renderMatrixTable() {
+            return `
+                <div class="matrix-card">
+                    <div style="font-weight: 800; font-size: 0.95rem;">📊 BẢNG ĐỐI CHIẾU THỰC THI (SUMMARY MATRIX)</div>
+                    <table class="matrix-table">
+                        <thead>
+                            <tr>
+                                <th>Tiêu Chí ARCHITECTURE</th>
+                                <th>🔴 Docker CLI (demo-docker-cli)</th>
+                                <th>🟢 Docker Compose (demo-docker)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="criteria">Số Lệnh Thực Thi</td>
+                                <td class="cli-cell">❌ 5 lệnh gõ + 4 lệnh dọn dẹp (Tổng 9 lệnh)</td>
+                                <td class="compose-cell">✅ 1 lệnh up -d + 1 lệnh down -v</td>
+                            </tr>
+                            <tr>
+                                <td class="criteria">Khởi Tạo Mạng (Network)</td>
+                                <td class="cli-cell">❌ Gõ thủ công <code>docker network create demo-net</code></td>
+                                <td class="compose-cell">✅ Tự động tạo Isolated Bridge Network</td>
+                            </tr>
+                            <tr>
+                                <td class="criteria">Service DNS Link</td>
+                                <td class="cli-cell">⚠️ Gõ tên container trong CLI flag</td>
+                                <td class="compose-cell">✅ Tự động phân giải tên Service (db:5432)</td>
+                            </tr>
+                            <tr>
+                                <td class="criteria">Thứ Tự Bật Container</td>
+                                <td class="cli-cell">❌ Tự canh thứ tự gõ tay (bật DB trước ➔ App sau)</td>
+                                <td class="compose-cell">✅ <code>depends_on</code> tự điều phối 100%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        // Direct execution call + DOM load fallback
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', renderView);
+        } else {
+            renderView();
+        }
+    </script>
+</body>
+</html>

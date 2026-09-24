@@ -27,7 +27,7 @@ Tài liệu cẩm nang toàn diện về hệ thống quản lý phiên bản Gi
   - [4.5. Bộ lệnh cứu nguy & Khôi phục (`restore` / `amend` / `reset` / `revert` / `reflog`)](#45-bộ-lệnh-cứu-nguy--khôi-phục)
 - [5. Đánh Giá & Quy Tắc Sử Dụng](#5-đánh-giá--quy-tắc-sử-dụng)
   - [5.1. Ưu và nhược điểm của Git](#51-ưu--nhược-điểm-của-git)
-  - [5.2. Quy tắc làm việc chuẩn trong nhóm (Best Practices)](#52-quy-tắc-làm-việc-chuẩn)
+  - [5.2. Quy tắc làm việc chuẩn trong nhóm (s)](#52-quy-tắc-làm-việc-chuẩn)
 
 ---
 

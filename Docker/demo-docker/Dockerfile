@@ -1,4 +1,4 @@
-# 1. Dùng base image Node.js phiên bản 
+# 1. Dùng base image Node.js 
 FROM node:20-alpine
 
 # 2. Thiết lập thư mục làm việc mặc định bên trong container
