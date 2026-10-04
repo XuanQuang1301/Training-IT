@@ -189,11 +189,11 @@ flowchart TD
     
     KGS -.->|Batch Key Refill| PS1
     KGS -.->|Batch Key Refill| PS2
-    KGS <-->|Atomic Key State Transfer| Postgres
+    KGS -->|Atomic Key State Transfer| Postgres
     
-    PS1 & PS2 <-->|Read / Write Cache| Redis
-    PS1 & PS2 <-->|Metadata Operations| Postgres
-    PS1 & PS2 <-->|Upload / Download Blobs| S3
+    PS1 & PS2 -->|Read / Write Cache| Redis
+    PS1 & PS2 -->|Metadata Operations| Postgres
+    PS1 & PS2 -->|Upload / Download Blobs| S3
     
     CleanupWorker -->|Scan expired pastes| Postgres
     CleanupWorker -->|Delete expired blobs| S3

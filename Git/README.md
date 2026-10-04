@@ -91,8 +91,8 @@ flowchart LR
     subgraph DVCS ["Mô hình phân tán (DVCS: Git)"]
         direction TB
         Server2["Remote Server (GitHub/GitLab)<br/>(Trung tâm đồng bộ)"]
-        ClientA2["Máy Dev A<br/>(Bản sao đầy đủ Repo & Lịch sử)"] <-->|Push / Pull| Server2
-        ClientB2["Máy Dev B<br/>(Bản sao đầy đủ Repo & Lịch sử)"] <-->|Push / Pull| Server2
+        ClientA2["Máy Dev A<br/>(Bản sao đầy đủ Repo & Lịch sử)"] -->|Push / Pull| Server2
+        ClientB2["Máy Dev B<br/>(Bản sao đầy đủ Repo & Lịch sử)"] -->|Push / Pull| Server2
     end
 ```
 
