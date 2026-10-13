@@ -1,0 +1,91 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "PP Hub - OnlyOffice Activity & Process Workflow",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "full-activity",
+        "label": "Toàn bộ quy trình Activity",
+        "focus": ["user_click", "check_auth", "init_editor", "fetch_blob", "collab_session", "trigger_save", "webhook_cb", "save_version"],
+        "note": "Quy trình Activity từ khi click mở file đến khi đồng sửa và lưu phiên bản mới."
+      },
+      {
+        "id": "auth-init",
+        "label": "Khởi tạo & Phân quyền",
+        "focus": ["user_click", "check_auth", "init_editor"],
+        "note": "Xác thực JWT và kiểm tra quyền EDITOR của người dùng."
+      },
+      {
+        "id": "editing-save",
+        "label": "Đồng sửa & Lưu trữ",
+        "focus": ["collab_session", "trigger_save", "webhook_cb", "save_version"],
+        "note": "Đồng bộ WebSocket thời gian thực và ghi nhận phiên bản mới vào MinIO."
+      }
+    ]
+  },
+  "lanes": [
+    { "id": "ui", "label": "Giao diện Người dùng (React UI)" },
+    { "id": "backend", "label": "PP Hub Core Services (API Gateway & Auth)" },
+    { "id": "editing", "label": "OnlyOffice Engine (Docker Container)" },
+    { "id": "storage", "label": "Lớp Lưu trữ (MinIO & PostgreSQL)" }
+  ],
+  "phases": [
+    { "id": "phase1", "label": "1. Khởi tạo & Auth", "fromCol": 0, "toCol": 1 },
+    { "id": "phase2", "label": "2. Stream & Đồng sửa", "fromCol": 2, "toCol": 4, "variant": "emphasis" },
+    { "id": "phase3", "label": "3. Lưu & Đóng Version", "fromCol": 5, "toCol": 5, "variant": "dashed" }
+  ],
+  "groups": [
+    { "id": "auth_group", "label": "Xác thực & ACL", "lane": "backend", "fromCol": 1, "toCol": 1, "variant": "security" },
+    { "id": "edit_group", "label": "Phiên đồng sửa WebSocket", "lane": "editing", "fromCol": 2, "toCol": 4, "variant": "emphasis" },
+    { "id": "save_group", "label": "Ghi nhận Version mới", "lane": "storage", "fromCol": 5, "toCol": 5, "variant": "dashed" }
+  ],
+  "mainPath": ["user_click", "check_auth", "init_editor", "fetch_blob", "collab_session", "trigger_save", "webhook_cb", "save_version"],
+  "nodes": [
+    { "id": "user_click", "lane": "ui", "col": 0, "type": "external", "label": "Mở Tài Liệu", "sublabel": "Click file .docx / .xlsx", "width": 132 },
+    { "id": "check_auth", "lane": "backend", "col": 1, "type": "security", "label": "Kiểm Tra Quyền ACL", "sublabel": "Verify JWT & Role EDITOR", "tag": "Check ACL", "width": 140 },
+    { "id": "init_editor", "lane": "editing", "col": 2, "type": "frontend", "label": "Khởi Tạo Editor Frame", "sublabel": "Nhúng OnlyOffice Frame", "width": 140 },
+    { "id": "fetch_blob", "lane": "storage", "col": 3, "type": "database", "label": "Stream Blob Gốc", "sublabel": "Tải file từ MinIO Storage", "width": 136 },
+    { "id": "collab_session", "lane": "editing", "col": 4, "type": "backend", "label": "Đồng Sửa Real-time", "sublabel": "WebSocket Sync Multi-user", "tag": "Multi-user WS", "width": 144 },
+    { "id": "trigger_save", "lane": "ui", "col": 5, "type": "external", "label": "Lưu Tài Liệu", "sublabel": "Bấm Ctrl+S hoặc Đóng tab", "width": 136 },
+    { "id": "webhook_cb", "lane": "editing", "col": 5, "type": "messagebus", "label": "Webhook Callback", "sublabel": "OnlyOffice gọi về Core API", "width": 140 },
+    { "id": "save_version", "lane": "storage", "col": 5, "type": "database", "label": "Lưu Version Mới", "sublabel": "Lưu MinIO & Postgres +1", "width": 140 }
+  ],
+  "edges": [
+    { "id": "e1", "from": "user_click", "to": "check_auth", "label": "Request mở file", "variant": "emphasis" },
+    { "id": "e2", "from": "check_auth", "to": "init_editor", "label": "Cấp JWT & Config", "variant": "security" },
+    { "id": "e3", "from": "init_editor", "to": "fetch_blob", "label": "Kéo Blob gốc", "variant": "default" },
+    { "id": "e4", "from": "fetch_blob", "to": "collab_session", "label": "Render editor", "variant": "emphasis" },
+    { "id": "e5", "from": "collab_session", "to": "trigger_save", "label": "Kết thúc chỉnh sửa", "variant": "default" },
+    { "id": "e6", "from": "trigger_save", "to": "webhook_cb", "label": "Phát lệnh lưu", "variant": "emphasis" },
+    { "id": "e7", "from": "webhook_cb", "to": "save_version", "label": "Ghi nhận version mới", "variant": "dashed" }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Giai đoạn Khởi tạo & Phân quyền",
+      "items": [
+        "Người dùng chọn mở tài liệu Office trên Web UI",
+        "Backend API kiểm tra JWT Token và xác minh quyền EDITOR trong bảng ACL",
+        "Nếu hợp lệ, API trả về Config JSON kèm mã Token bảo mật để nhúng OnlyOffice Frame"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Giai đoạn Đồng sửa Thời gian thực",
+      "items": [
+        "OnlyOffice Server tự động kéo dữ liệu Blob từ MinIO qua Core API để render văn bản",
+        "Các thành viên cùng mở file sẽ được kết nối vào kênh WebSocket để đồng nhất từng ký tự nhập liệu"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Giai đoạn Lưu & Ghi nhận Phiên bản",
+      "items": [
+        "Khi người dùng lưu tài liệu hoặc đóng tab, OnlyOffice kích hoạt Webhook Callback về Backend",
+        "Core API tải file đã sửa về MinIO Blob Storage và tăng số hiệu phiên bản trong PostgreSQL"
+      ]
+    }
+  ]
+}

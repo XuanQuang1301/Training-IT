@@ -1,19 +1,53 @@
-# Thiết Kế Kiến Trúc Hệ Thống: PP Hub
+# Tài Liệu Thiết Kế Kiến Trúc Hệ Thống: PP Hub
 
 > **Loại hệ thống**: Enterprise Document Management & Collaboration Platform (Google Drive Clone cho Doanh nghiệp)  
-> **Quy mô**: 20 – 50 nhân sự  
+> **Quy mô mục tiêu**: 20 – 50 nhân sự  
 > **Mô hình triển khai**: Self-host (Cài đặt trên hạ tầng / Server / Cloud VPS riêng của doanh nghiệp)  
-> **Mục tiêu**: Thay thế công cụ Google Drive để làm chủ dữ liệu nội bộ, tối ưu chi phí vận hành dài hạn, đảm bảo giao diện quen thuộc và hỗ trợ chỉnh sửa tài liệu Office/Markdown trực tiếp.
+> **Mục tiêu cốt lõi**: Thay thế công cụ Google Drive để làm chủ 100% dữ liệu nội bộ, tối ưu chi phí vận hành dài hạn, đảm bảo giao diện quen thuộc và hỗ trợ chỉnh sửa tài liệu Office/Markdown trực tiếp trên trình duyệt.
 
 ---
 
-## 1. Yêu cầu hệ thống
+## 📋 Mục Lục
+
+1. [Yêu Cầu Hệ Thống](#1-yêu-cầu-hệ-thống)
+   - [1.1 Yêu Cầu Chức Năng (Functional Requirements)](#11-yêu-cầu-chức-năng-functional-requirements)
+   - [1.2 Yêu Cầu Phi Chức Năng (Non-Functional Requirements)](#12-yêu-cầu-phi-chức-năng-non-functional-requirements)
+2. [Ước Tính Dung Lượng & Cấu Hình Hạ Tầng](#2-ước-tính-dung-lượng--cấu-hình-hạ-tầng)
+   - [2.1 Bảng Ước Tính Nhu Cầu Tài Nguyên](#21-bảng-ước-tính-nhu-cầu-tài-nguyên)
+   - [2.2 Đề Xuất Cấu Hình Phần Cứng Server / Cloud VPS](#22-đề-xuất-cấu-hình-phần-cứng-server--cloud-vps)
+3. [Kiến Trúc Tổng Quan (Architecture Diagram)](#3-kiến-trúc-tổng-quan-architecture-diagram)
+4. [Chi Tiết Các Thành Phần Chính](#4-chi-tiết-các-thành-phần-chính)
+   - [4.1 Giao Diện Người Dùng (Frontend Web Application)](#41-giao-diện-người-dùng-frontend-web-application)
+   - [4.2 Backend API Gateway & Services](#42-backend-api-gateway--services)
+   - [4.3 Office Processing Engine (OnlyOffice Document Server)](#43-office-processing-engine-onlyoffice-document-server)
+   - [4.4 Lớp Lưu Trữ Dữ Liệu (Storage Layer & Data Schema)](#44-lớp-lưu-trữ-dữ-liệu-storage-layer--data-schema)
+5. [Thiết Kế API Endpoints](#5-thiết-kế-api-endpoints)
+   - [5.1 API Quản Lý File & Thư Mục](#51-api-quản-lý-file--thư-mục)
+   - [5.2 API Upload File Lớn (Chunked / Resumable Upload)](#52-api-upload-file-lớn-chunked--resumable-upload)
+   - [5.3 API Tích Hợp Chỉnh Sửa (OnlyOffice & Markdown)](#53-api-tích-hợp-chỉnh-sửa-onlyoffice--markdown)
+   - [5.4 API Phân Quyền (ACL & Permissions)](#54-api-phân-quyền-acl--permissions)
+6. [Các Luồng Xử Lý Dữ Liệu (Workflows & Sequence Diagrams)](#6-các-luồng-xử-lý-dữ-liệu-workflows--sequence-diagrams)
+   - [6.1 Luồng Chỉnh Sửa File Office Trực Tuyến (OnlyOffice Flow)](#61-luồng-chỉnh-sửa-file-office-trực-tuyến-onlyoffice-flow)
+   - [6.2 Luồng Chỉnh Sửa File Markdown (.md)](#62-luồng-chỉnh-sửa-file-markdown-md)
+   - [6.3 Luồng Upload File Dung Lượng Lớn (Chunked Resumable Upload)](#63-luồng-upload-file-dung-lượng-lớn-chunked-resumable-upload)
+   - [6.4 Luồng Kiểm Tra & Kế Thừa Quyền (Permission Evaluation Engine)](#64-luồng-kiểm-tra--kế-thừa-quyền-permission-evaluation-engine)
+7. [Tiến Trình Ngầm & Dọn Dẹp Dữ Liệu Hết Hạn (TTL Cleanup)](#7-tiến-trình-ngầm--dọn-dẹp-dữ-liệu-hết-hạn-ttl-cleanup)
+   - [7.1 Dọn Dẹp Thùng Rác Hết Hạn (Soft Delete TTL 30 Ngày)](#71-dọn-dẹp-thùng-rác-hết-hạn-soft-delete-ttl-30-ngày)
+   - [7.2 Dọn Dẹp Session Upload Dang Dở (TTL 24 Giờ)](#72-dọn-dẹp-session-upload-dang-dở-ttl-24-giờ)
+   - [7.3 Dọn Dẹp Phiên Bản File Cũ (File Version Pruning Policy)](#73-dọn-dẹp-phiên-bản-file-cũ-file-version-pruning-policy)
+8. [Quản Lý Bộ Nhớ Đệm, Mở Rộng & Bảo Mật](#8-quản-lý-bộ-nhớ-đệm-mở-rộng--bảo-mật)
+9. [Đánh Giá & So Sánh Tổng Kết](#9-đánh-giá--so-sánh-tổng-kết)
+10. [Mô Phỏng Trực Quan Tương Tác Về Hệ Thống (Interactive Demo)](#10-mô-phỏng-trực-quan-tương-tác-về-hệ-thống-interactive-demo)
+
+---
+
+## 1. Yêu Cầu Hệ Thống
 
 ### 1.1. Yêu Cầu Chức Năng (Functional Requirements)
 
 - **Quản lý Không gian (Spaces) & Phân nhóm**:
   - **Space cá nhân (*My Drive*)**: Không gian lưu trữ riêng tư cho từng nhân viên.
-  - **Space nhóm / phòng ban (*Team Spaces*)**: Không gian dùng chung cho từng bộ phận (Ví dụ: Phòng Kế Toán, Phòng Marketing, Phòng Dev, Dự Án X).
+  - **Space nhóm / phòng ban (*Team Spaces*)**: Không gian dùng chung cho từng bộ phận (Ví dụ: *Phòng Kế Toán*, *Phòng Marketing*, *Phòng Dev*, *Dự Án X*).
   - **Quản lý Nhóm (Groups)**: Phân nhóm nhân viên (Ví dụ: `@dev-team`, `@marketing-team`, `@managers`) để gán quyền nhanh cho tập hợp nhiều người dùng.
 
 - **Quản lý File & Thư Mục (File System Management)**:
@@ -22,11 +56,11 @@
   - **Quản lý Thùng rác (Trash / Soft Delete)**: File/Folder khi xóa sẽ đưa vào Thùng rác, cho phép khôi phục (Restore) hoặc xóa vĩnh viễn (Hard Delete).
 
 - **Chỉnh sửa Tài liệu Trực tuyến (Online Editing & Collaboration)**:
-  - **Tài liệu Office (`.docx`, `.xlsx`, `.pptx`)**: Chỉnh sửa trực tiếp trên trình duyệt web, hỗ trợ đồng sửa thời gian thực (Real-time Multi-user Collaboration) nhờ tích hợp **OnlyOffice Document Server**. Giữ nguyên 100% định dạng file.
-  - **Tài liệu Markdown (`.md`)**: Trình soạn thảo Markdown tích hợp với chế độ xem trước (Live Preview split-pane) theo thời gian thực, lưu nhanh với `Ctrl + S`.
-  - **Quản lý Phiên bản File (File Versioning)**: Tự động lưu vết và tạo phiên bản mới khi file được chỉnh sửa. Hỗ trợ xem lại lịch sử và khôi phục về các phiên bản cũ.
+  - **Tài liệu Office (`.docx`, `.xlsx`, `.pptx`)**: Chỉnh sửa trực tiếp trên trình duyệt web, hỗ trợ đồng sửa thời gian thực (Real-time Multi-user Collaboration) nhờ tích hợp **OnlyOffice Document Server**. Giữ nguyên 100% định dạng file gốc.
+  - **Tài liệu Markdown (`.md`)**: Trình soạn thảo Markdown tích hợp với chế độ xem trước (Live Preview split-pane) theo thời gian thực, hỗ trợ phím tắt `Ctrl + S`.
+  - **Quản lý Phiên bản File (File Versioning)**: Tự động lưu vết và tạo phiên bản mới khi file được chỉnh sửa. Hỗ trợ xem lịch sử và khôi phục về các phiên bản cũ.
 
-- **Phân Chuyển Quyền Hạn (ACL & RBAC Engine)**:
+- **Phân Quyền Truy Cập (ACL & RBAC Engine)**:
   - Phân quyền theo nhiều cấp độ chi tiết:
     - **Owner (Chủ sở hữu)**: Quyền tối cao đối với Space/File.
     - **Admin (Quản trị space)**: Quản lý thành viên và phân quyền trong Space.
@@ -37,16 +71,16 @@
 
 - **Tìm kiếm & Phân loại**:
   - Tìm kiếm nhanh theo tên file, loại file (MIME type), người tạo, khoảng thời gian cập nhật.
-  - Giao diện linh hoạt: Chế độ Lưới (Grid view) và Danh sách (List view).
+  - Giao diện hiển thị linh hoạt: Chế độ Lưới (Grid view) và Chế độ Danh sách (List view).
 
 ---
 
 ### 1.2. Yêu Cầu Phi Chức Năng (Non-Functional Requirements)
 
 - **Hiệu năng & Phản hồi (Performance)**:
-  - Thời gian tải danh sách file/folder (Folder listing API): $< 200\text{ms}$ ($< 50\text{ms}$ khi sử dụng Redis cache).
+  - Thời gian tải danh sách file/folder (Folder listing API): `< 200 ms` (`< 50 ms` khi có Redis cache).
   - Hỗ trợ tải lên file dung lượng lớn (tới 5GB+) bằng cơ chế **Chunked / Resumable Upload** (phân đoạn file).
-  - Trải nghiệm đồng sửa Office mượt mà, độ trễ đồng bộ ký tự $< 100\text{ms}$.
+  - Trải nghiệm đồng sửa Office mượt mà, độ trễ đồng bộ ký tự `< 100 ms`.
 
 - **Tính Tự Chủ & Bảo Mật Dữ Liệu (Data Sovereignty & Security)**:
   - **100% Self-hosted**: Toàn bộ dữ liệu nằm trên Server nội bộ hoặc Cloud VPS của công ty, không phụ thuộc bên thứ 3.
@@ -63,11 +97,13 @@
 
 ---
 
-## 2. Ước Tính Dung Lượng & Tài Nguyên
+## 2. Ước Tính Dung Lượng & Cấu Hình Hạ Tầng
+
+### 2.1. Bảng Ước Tính Nhu Cầu Tài Nguyên
 
 Dưới đây là bảng ước tính nhu cầu tài nguyên cho quy mô doanh nghiệp **20 – 50 nhân sự**:
 
-| Tiêu chí | Ưắc tính trung bình |
+| Tiêu chí | Ước tính trung bình |
 |---|---|
 | **Số lượng nhân sự** | 20 – 50 người dùng |
 | **Số người dùng đồng thời tối đa (Peak Active Users)** | 15 – 30 người sử dụng cùng một lúc |
@@ -76,21 +112,22 @@ Dưới đây là bảng ước tính nhu cầu tài nguyên cho quy mô doanh n
 | **Dung lượng lưu trữ trung bình / nhân viên** | 30 GB – 50 GB / người |
 | **Tổng dung lượng lưu trữ đĩa cứng ban đầu** | **1 TB – 2 TB SSD / NVMe** (Hỗ trợ mở rộng theo thời gian) |
 | **Bộ nhớ RAM tiêu tốn cho OnlyOffice Engine** | ~50MB – 100MB RAM / 1 phiên chỉnh sửa Office (~2GB – 3GB RAM riêng cho container OnlyOffice khi 20 người đồng thời mở sửa file) |
-| **Yêu cầu Băng thông mạng (Network Bandwidth)** | Mạng nội bộ LAN 1 Gbps hoặc đường truyền VPN $\ge 100\text{Mbps}$ |
+| **Yêu cầu Băng thông mạng (Network Bandwidth)** | Mạng nội bộ LAN 1 Gbps hoặc đường truyền VPN $\ge 100 \text{ Mbps}$ |
 
-### Đề Xuất Cấu Hình Phần Cứng Server / Cloud VPS (Self-hosted)
+### 2.2. Đề Xuất Cấu Hình Phần Cứng Server / Cloud VPS (Self-hosted)
 
 Để vận hành toàn bộ stack (Frontend, Backend, OnlyOffice, Postgres, Redis, MinIO), máy chủ cần cấu hình tối thiểu:
+
 - **CPU**: 8 Cores (Intel Xeon / AMD EPYC / Modern x86_64)
-- **RAM**: 16 GB DDR4/DDR5
+- **RAM**: 16 GB DDR4 / DDR5
 - **Ổ cứng**: 2 TB SSD NVMe (Khuyến nghị RAID 1 mirroring hoặc có cơ chế Backup hàng ngày)
-- **HĐH**: Ubuntu Server 22.04 LTS
+- **HĐH**: Ubuntu Server 22.04 LTS / 24.04 LTS
 
 ---
 
 ## 3. Kiến Trúc Tổng Quan (Architecture Diagram)
 
-Sơ đồ bên dưới thể hiện sự tương tác giữa trình duyệt người dùng, cổng Nginx Gateway, các microservices backend, OnlyOffice Document Server và lớp dữ liệu lưu trữ (PostgreSQL, Redis, MinIO):
+Sơ đồ bên dưới thể hiện sự tương tác giữa trình duyệt người dùng, cổng Nginx Gateway, các dịch vụ backend, OnlyOffice Document Server và lớp dữ liệu lưu trữ (PostgreSQL, Redis, MinIO):
 
 ```mermaid
 flowchart TD
@@ -101,7 +138,7 @@ flowchart TD
     end
 
     subgraph Edge ["Gateway Layer"]
-        Proxy["Nginx / Caddy Proxy<br/>(HTTPS, SSL Termination & Reverse Proxy)"]
+        Proxy["Nginx Proxy / SSL Termination<br/>(HTTPS Reverse Proxy)"]
     end
 
     subgraph AppCluster ["Application Service Layer (PP Hub Core)"]
@@ -142,9 +179,10 @@ flowchart TD
 
 ---
 
-## 4. Chi tiết các thành phần chính
+## 4. Chi Tiết Các Thành Phần Chính
 
 ### 4.1. Giao Diện Người Dùng (Frontend Web Application)
+
 - Được xây dựng theo phong cách thiết kế quen thuộc của Google Drive:
   - **Thanh bên trái (Left Sidebar)**: Nút `+ Tạo mới` (Tạo folder, file Word/Excel/MD, Upload file), cây chuyển đổi giữa *My Space*, *Team Spaces*, *Được chia sẻ*, *Thùng rác*.
   - **Thanh tìm kiếm & Breadcrumb trên cùng**: Tìm kiếm thông minh và hiển thị đường dẫn thư mục hiện tại (`Root / Phòng Dev / Dự Án 2026`).
@@ -152,67 +190,70 @@ flowchart TD
   - **Panel thông tin bên phải (Inspection Panel)**: Xem chi tiết thumbnail, lịch sử phiên bản, kích thước file và danh sách người được phân quyền.
 
 ### 4.2. Backend API Gateway & Services
+
 - Đảm nhận toàn bộ logic nghiệp vụ hệ thống:
-  - Quản lý xác thực (JWT Auth), phân quyền truy cập (ACL & RBAC).
-  - Quản lý cấu trúc cây thư mục (Adjacency List tree traversal).
+  - Quản lý xác thực (JWT Auth), phân quyền truy cập (ACL & RBAC Engine).
+  - Quản lý cấu trúc cây thư mục (Adjacency List / Closure Table tree traversal).
   - Xử lý nhận file tải lên theo từng phân đoạn (Chunked Upload Engine).
   - Cung cấp RESTful endpoints và Webhook làm cầu nối với OnlyOffice Document Server.
 
 ### 4.3. Office Processing Engine (OnlyOffice Document Server)
+
 - Đóng gói dưới dạng Docker container `onlyoffice/documentserver`.
 - Chịu trách nhiệm render văn bản Office trực tiếp trên Web Browser.
 - Quản lý phiên làm việc đồng thời (Multi-user session), tự động giải quyết xung đột khi nhiều người cùng nhập liệu qua kết nối WebSocket nội bộ giữa OnlyOffice Server và Client Browser.
 
-### 4.4. Lớp Lưu Trữ Dữ Liệu (Storage Layer)
+### 4.4. Lớp Lưu Trữ Dữ Liệu (Storage Layer & Data Schema)
 
-1. **Cơ sở dữ liệu PostgreSQL 16 (Metadata & ACL)**:
-   - Lưu trữ toàn bộ thông tin tài khoản người dùng (`users`), nhóm (`groups`), không gian (`spaces`), cấu trúc cây file/folder (`nodes`), lịch sử phiên bản (`file_versions`), và phân quyền (`permissions`).
+#### 1. Cơ sở dữ liệu PostgreSQL 16 (Metadata & ACL)
+Lưu trữ toàn bộ thông tin tài khoản người dùng (`users`), nhóm (`groups`), không gian (`spaces`), cấu trúc cây file/folder (`nodes`), lịch sử phiên bản (`file_versions`), và phân quyền (`permissions`).
 
-   *Sơ đồ bảng dữ liệu cốt lõi:*
-   ```sql
-   -- Bảng quản lý File & Thư mục (Tree Structure)
-   CREATE TABLE nodes (
-       id VARCHAR(36) PRIMARY KEY,
-       space_id VARCHAR(36) NOT NULL,
-       parent_id VARCHAR(36) REFERENCES nodes(id) ON DELETE CASCADE,
-       name VARCHAR(255) NOT NULL,
-       is_folder BOOLEAN NOT NULL DEFAULT FALSE,
-       storage_key VARCHAR(512), -- Đường dẫn file lưu trong MinIO/Disk
-       size_bytes BIGINT DEFAULT 0,
-       mime_type VARCHAR(127),
-       version INT DEFAULT 1,
-       is_deleted BOOLEAN DEFAULT FALSE,
-       deleted_at TIMESTAMP WITH TIME ZONE,
-       created_by VARCHAR(36) NOT NULL,
-       created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-       updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-   );
+*Sơ đồ bảng dữ liệu cốt lõi:*
 
-   CREATE INDEX idx_nodes_parent_space ON nodes(space_id, parent_id, is_deleted);
+```sql
+-- Bảng quản lý File & Thư mục (Tree Structure)
+CREATE TABLE nodes (
+    id VARCHAR(36) PRIMARY KEY,
+    space_id VARCHAR(36) NOT NULL,
+    parent_id VARCHAR(36) REFERENCES nodes(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    is_folder BOOLEAN NOT NULL DEFAULT FALSE,
+    storage_key VARCHAR(512), -- Đường dẫn file lưu trong MinIO/Disk
+    size_bytes BIGINT DEFAULT 0,
+    mime_type VARCHAR(127),
+    version INT DEFAULT 1,
+    is_deleted BOOLEAN DEFAULT FALSE,
+    deleted_at TIMESTAMP WITH TIME ZONE,
+    created_by VARCHAR(36) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
 
-   -- Bảng Phân Quyền (ACL)
-   CREATE TABLE permissions (
-       id VARCHAR(36) PRIMARY KEY,
-       node_id VARCHAR(36) REFERENCES nodes(id) ON DELETE CASCADE,
-       space_id VARCHAR(36),
-       target_type VARCHAR(10) NOT NULL, -- 'USER' hoặc 'GROUP'
-       target_id VARCHAR(36) NOT NULL,
-       role VARCHAR(20) NOT NULL, -- 'ADMIN', 'EDITOR', 'VIEWER'
-       created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-   );
-   ```
+CREATE INDEX idx_nodes_parent_space ON nodes(space_id, parent_id, is_deleted);
 
-2. **Bộ nhớ đệm Redis 7 (Caching & Distributed Lock)**:
-   - Cache bảng phân quyền ACL để tăng tốc độ kiểm tra quyền ($< 5\text{ms}$).
-   - Lưu trữ User Session Tokens và thực hiện Distributed Locking khi có thao tác chỉnh sửa file tránh xung đột race condition.
+-- Bảng Phân Quyền (ACL)
+CREATE TABLE permissions (
+    id VARCHAR(36) PRIMARY KEY,
+    node_id VARCHAR(36) REFERENCES nodes(id) ON DELETE CASCADE,
+    space_id VARCHAR(36),
+    target_type VARCHAR(10) NOT NULL, -- 'USER' hoặc 'GROUP'
+    target_id VARCHAR(36) NOT NULL,
+    role VARCHAR(20) NOT NULL, -- 'ADMIN', 'EDITOR', 'VIEWER'
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+```
 
-3. **MinIO Object Storage / File System (Blob Storage)**:
-   - Lưu trữ nội dung thực tế của các file (File Blobs) theo cơ chế đường dẫn định danh hash: `/storage/{space_id}/{hash_key}`.
-   - Lưu các file bản cũ trong lịch sử phiên bản (Version History).
+#### 2. Bộ nhớ đệm Redis 7 (Caching & Distributed Lock)
+- Cache bảng phân quyền ACL để tăng tốc độ kiểm tra quyền (`< 5 ms`).
+- Lưu trữ User Session Tokens và thực hiện Distributed Locking khi có thao tác chỉnh sửa file tránh xung đột race condition.
+
+#### 3. MinIO Object Storage / File System (Blob Storage)
+- Lưu trữ nội dung thực tế của các file (File Blobs) theo cơ chế đường dẫn định danh hash: `/storage/{space_id}/{hash_key}`.
+- Lưu các file bản cũ trong lịch sử phiên bản (Version History).
 
 ---
 
-## 5. Thiết kế API
+## 5. Thiết Kế API Endpoints
 
 Hệ thống thiết kế chuẩn RESTful API với định dạng trao đổi JSON:
 
@@ -255,7 +296,7 @@ Hệ thống thiết kế chuẩn RESTful API với định dạng trao đổi J
 
 ---
 
-### 5.2. API Resumable / Chunked Upload (Upload File Lớn)
+### 5.2. API Upload File Lớn (Chunked / Resumable Upload)
 
 #### `POST /api/v1/files/upload-session` — Khởi Tạo Session Upload
 - **Request Body**:
@@ -278,7 +319,7 @@ Hệ thống thiết kế chuẩn RESTful API với định dạng trao đổi J
   ```
 
 #### `PUT /api/v1/files/upload/{upload_id}/chunk/{chunk_index}` — Tải Lên Từng Chunk
-- **Request Body**: Binary Data of Chunk
+- **Request Body**: Binary Data của Chunk
 - **Response `200 OK`**: `{ "status": "chunk_received", "chunk_index": 0 }`
 
 #### `POST /api/v1/files/upload/{upload_id}/complete` — Hoàn Tất Upload & Ghép File
@@ -314,22 +355,22 @@ Hệ thống thiết kế chuẩn RESTful API với định dạng trao đổi J
 
 ---
 
-### 5.4. API Phân Quyền (Permissions)
+### 5.4. API Phân Quyền (ACL & Permissions)
 
 #### `POST /api/v1/permissions` — Phân Quyền Truy Cập
 - **Request Body**:
   ```json
   {
     "node_id": "f-123",
-    "target_type": "GROUP", // 'USER' hoặc 'GROUP'
+    "target_type": "GROUP",
     "target_id": "grp-dev-team",
-    "role": "EDITOR" // 'ADMIN', 'EDITOR', 'VIEWER'
+    "role": "EDITOR"
   }
   ```
 
 ---
 
-## 6. Luồng Xử Lý Dữ Liệu (Workflows)
+## 6. Các Luồng Xử Lý Dữ Liệu (Workflows & Sequence Diagrams)
 
 ### 6.1. Luồng Chỉnh Sửa File Office Trực Tuyến (OnlyOffice Flow)
 
@@ -367,13 +408,15 @@ sequenceDiagram
 ---
 
 ### 6.2. Luồng Chỉnh Sửa File Markdown (.md)
+
 1. **Mở file**: User chọn file `.md` $\rightarrow$ Web App gọi `GET /api/v1/files/{id}/content` để tải chuỗi plain-text.
-2. **Soạn thảo**: Giao diện chia đôi màn hình (Split-pane): Bên trái gõ Markdown, bên phải render HTML live qua thư viện `marked` / `react-markdown`.
+2. **Soạn thảo**: Giao diện chia đôi màn hình (Split-pane): Bên trái gõ Markdown, bên phải render HTML live qua thư viện Markdown.
 3. **Lưu file**: Người dùng bấm `Ctrl + S` $\rightarrow$ Web App gọi `PUT /api/v1/files/{id}/content` $\rightarrow$ Backend cập nhật file trên MinIO và cập nhật trường `updated_at` trong PostgreSQL.
 
 ---
 
 ### 6.3. Luồng Upload File Dung Lượng Lớn (Chunked Resumable Upload)
+
 1. Client cắt file thành các đoạn nhỏ (mặc định 5MB/chunk).
 2. Gọi API khởi tạo Session Upload $\rightarrow$ Nhận `upload_id`.
 3. Gửi song song (Parallel 3 chunks) lên Server. Server lưu tạm các chunk vào thư mục đệm `/tmp/uploads/{upload_id}/`.
@@ -383,6 +426,7 @@ sequenceDiagram
 ---
 
 ### 6.4. Luồng Kiểm Tra & Kế Thừa Quyền (Permission Evaluation Engine)
+
 Khi người dùng $U$ thực hiện thao tác trên Node $N$ (File/Folder):
 1. Hệ thống kiểm tra xem có bản ghi phân quyền trực tiếp cho $U$ hoặc Group của $U$ tại $N$ hay không.
 2. Nếu có $\rightarrow$ Trả về Role trực tiếp đó.
@@ -392,7 +436,7 @@ Khi người dùng $U$ thực hiện thao tác trên Node $N$ (File/Folder):
 
 ---
 
-## 7. Cơ Chế Dọn Dẹp Dữ Liệu Hết Hạn (TTL Cleanup)
+## 7. Tiến Trình Ngầm & Dọn Dẹp Dữ Liệu Hết Hạn (TTL Cleanup)
 
 Để tránh lãng phí dung lượng đĩa cứng và tài nguyên hệ thống, PP Hub tích hợp các tiến trình dọn dẹp tự động chạy ngầm (Background Workers):
 
@@ -418,25 +462,24 @@ flowchart LR
   2. Xóa các bản ghi lịch sử trong `file_versions` và `permissions`.
   3. Xóa bản ghi node khỏi bảng `nodes` trong PostgreSQL.
 
-### 7.2. Dọn Dẹp Session Upload Dang Dở (Expired Upload Sessions TTL 24 Giờ)
+### 7.2. Dọn Dẹp Session Upload Dang Dở (TTL 24 Giờ)
 - Trong trường hợp người dùng đang tải lên file lớn nhưng bị mất mạng hoặc đóng trình duyệt giữa chừng, các đoạn chunk tạm sẽ nằm lại tại thư mục đệm `/tmp/uploads/{upload_id}/`.
 - **Tiến trình Worker**: Chạy định kỳ **mỗi 6 tiếng một lần**, tìm các Session Upload chưa hoàn thành được tạo cách đây hơn 24 giờ.
 - **Hành động**: Xóa toàn bộ tệp tin chunk tạm trong đĩa cứng để thu hồi dung lượng.
 
 ### 7.3. Dọn Dẹp Phiên Bản File Cũ (File Version Pruning Policy)
-- Để tránh việc tích tụ quá nhiều phiên bản file Office gây tốn dung lượng lưu trữ:
 - **Chính sách**: Giới hạn lưu tối đa **10 phiên bản cũ nhất** cho mỗi tệp tin hoặc xóa các bản ghi phiên bản đã tạo quá **90 ngày**.
 - **Hành động**: Khi một phiên bản mới được tạo khiến tổng số phiên bản $> 10$, hệ thống tự động phát lệnh xóa File Blob của phiên bản cũ nhất trên MinIO.
 
 ---
 
-## 8. Mở Rộng, Bộ Nhớ Đệm & Bảo Mật
+## 8. Quản Lý Bộ Nhớ Đệm, Mở Rộng & Bảo Mật
 
 Dưới đây là bảng chi tiết các vấn đề hệ thống và giải pháp thiết kế tương ứng cho PP Hub:
 
 | Vấn đề | Giải pháp thiết kế |
 |---|---|
-| **Bộ nhớ đệm (Caching System)** | Sử dụng **Redis 7** làm lớp Caching trung gian cho:<br/>1. Cache danh sách cây file/folder (`nodes`) theo `parent_id`.<br/>2. Cache kết quả phân quyền ACL của người dùng (TTL 5 phút).<br/>3. Lưu User Sessions Token.<br/>$\rightarrow$ Giúp giảm tới 80% truy vấn tới PostgreSQL, giữ phản hồi API danh sách file $< 20\text{ms}$. |
+| **Bộ nhớ đệm (Caching System)** | Sử dụng **Redis 7** làm lớp Caching trung gian cho:<br/>1. Cache danh sách cây file/folder (`nodes`) theo `parent_id`.<br/>2. Cache kết quả phân quyền ACL của người dùng (TTL 5 phút).<br/>3. Lưu User Sessions Token.<br/>$\rightarrow$ Giúp giảm tới 80% truy vấn tới PostgreSQL, giữ phản hồi API danh sách file `< 20 ms`. |
 | **Khả năng mở rộng (Scalability)** | Tất cả các thành phần dịch vụ Core API và Frontend được đóng gói dưới dạng **Stateless Containers**.<br/>Khi quy mô nhân sự tăng từ 50 lên 200+ người dùng, có thể dễ dàng tách riêng máy chủ OnlyOffice Server và máy chủ MinIO Storage sang các VPS/Node riêng biệt mà không ảnh hưởng tới logic ứng dụng. |
 | **Bảo mật & Tự chủ dữ liệu (Security & Data Control)** | 1. **Triển khai Self-hosted 100%**: Dữ liệu lưu tại máy chủ doanh nghiệp.<br/>2. **Mã hóa truyền tải**: Toàn bộ kết nối sử dụng HTTPS/TLS 1.3.<br/>3. **Xác thực**: JWT Token ngắn hạn (AccessToken 15 phút, RefreshToken 7 ngày), hỗ trợ tích hợp LDAP/Active Directory/SSO công ty.<br/>4. **Giới hạn số lần thử (Rate Limiting)**: Nginx Rate Limit ngăn chặn brute-force và DDoS nội bộ. |
 | **Sao lưu & Phục hồi dữ liệu (Backup & Recovery)** | 1. **Metadata Backup**: Chạy Cronjob tự động thực hiện `pg_dump` cơ sở dữ liệu PostgreSQL lúc 12h đêm hàng ngày, đẩy file backup `.sql` sang máy lưu trữ NAS đệm.<br/>2. **File Storage Backup**: Sử dụng công cụ `mc mirror` của MinIO để đồng bộ các File Blobs mới sang ổ cứng NAS nội bộ hoặc máy chủ Backup vật lý riêng biệt. |
@@ -445,7 +488,7 @@ Dưới đây là bảng chi tiết các vấn đề hệ thống và giải ph�
 
 ---
 
-## 9. Đánh Giá & Kết Luận
+## 9. Đánh Giá & So Sánh Tổng Kết
 
 | Tiêu chí | Google Drive Cloud | PP Hub (Self-hosted) |
 |---|---|---|
@@ -455,4 +498,30 @@ Dưới đây là bảng chi tiết các vấn đề hệ thống và giải ph�
 | **Chỉnh sửa Office** | Sử dụng Google Docs / Sheets | **OnlyOffice (Giữ nguyên 100% định dạng docx/xlsx)** |
 | **Triển khai & Bảo trì** | Google tự quản lý | **IT công ty vận hành đơn giản qua Docker Compose** |
 
-> **Tóm lại**: **PP Hub** là giải pháp thực tế, tối ưu chi phí và hiệu quả cao cho doanh nghiệp quy mô từ **20 – 50 nhân sự**. Không phức tạp rườm rà như các hệ thống Cloud hàng triệu người dùng, PP Hub tập trung giải quyết 3 giá trị cốt lõi: **Giao diện quen thuộc dễ dùng, Tự chủ bảo mật dữ liệu 100%, và Triển khai vô cùng dễ dàng.**
+> 💡 **Tóm lại**: **PP Hub** là giải pháp thực tế, tối ưu chi phí và hiệu quả cao cho doanh nghiệp quy mô từ **20 – 50 nhân sự**. Không phức tạp rườm rà như các hệ thống Cloud hàng triệu người dùng, PP Hub tập trung giải quyết 3 giá trị cốt lõi: **Giao diện quen thuộc dễ dùng, Tự chủ bảo mật dữ liệu 100%, và Triển khai vô cùng dễ dàng.**
+
+---
+
+## 10. Mô Phỏng Trực Quan Tương Tác Về Hệ Thống (Interactive Demo)
+
+> 🚀 **Ứng dụng Archify trong Hệ thống PP Hub**:  
+> Chúng ta có thể tận dụng bộ công cụ **[Archify](file:///d:/Nexis/Training/archify)** có sẵn trong workspace để biến tài liệu System Design này thành các **bản đồ hệ thống trực quan tương tác (Interactive System Map & Activity Workflow)** phục vụ việc thuyết minh, trình diễn (demo) cho Ban Giám đốc, Khách hàng hoặc Đội ngũ Kỹ thuật.
+
+### Các kịch bản Demo bằng Archify:
+1. **Interactive Architecture Diagram (Bản đồ Kiến trúc Trực quan)**:
+   - Cho phép người xem click vào từng Service (Nginx, Core API, OnlyOffice, Postgres, Redis, MinIO) để trace luồng dữ liệu.
+   - Hỗ trợ chuyển đổi giao diện sáng/tối (Dark/Light Mode), bật chế độ thuyết trình (Presentation Mode) và xuất ảnh chất lượng cao (PNG/SVG/Share Card).
+   - Bản demo mẫu đã được biên dịch tại: [pphub-architecture-demo.html](file:///d:/Nexis/Training/System%20Design%20cho%20h%E1%BB%87%20th%E1%BB%91ng%20PP%20Hub/pphub-architecture-demo.html).
+
+2. **Interactive Activity / Process Workflow (Mô phỏng Quy trình Hoạt động Đồng sửa OnlyOffice)**:
+   - Trình diễn quy trình Activity / Workflow dạng Swimlanes (User UI $\rightarrow$ Core API $\rightarrow$ OnlyOffice Engine $\rightarrow$ MinIO & PostgreSQL) qua từng giai đoạn: **Khởi tạo & Phân quyền** $\rightarrow$ **Đồng sửa WebSocket** $\rightarrow$ **Lưu & Ghi nhận phiên bản mới**.
+   - Bản demo mẫu Activity Workflow đã được biên dịch tại: [pphub-onlyoffice-activity-demo.html](file:///d:/Nexis/Training/System%20Design%20cho%20h%E1%BB%87%20th%E1%BB%91ng%20PP%20Hub/pphub-onlyoffice-activity-demo.html) (và cập nhật trực tiếp tại [pphub-onlyoffice-sequence-demo.html](file:///d:/Nexis/Training/System%20Design%20cho%20h%E1%BB%87%20th%E1%BB%91ng%20PP%20Hub/pphub-onlyoffice-sequence-demo.html)).
+
+### Cách chạy lại hoặc tùy chỉnh Demo:
+```bash
+# Biên dịch Sơ đồ Kiến trúc Tổng quan (Architecture Map)
+node "d:\Nexis\Training\archify\archify\bin\archify.mjs" deliver architecture "d:\Nexis\Training\System Design cho hệ thống PP Hub\pphub-architecture.json" "d:\Nexis\Training\System Design cho hệ thống PP Hub\pphub-architecture-demo.html" --quality showcase
+
+# Biên dịch Quy trình Hoạt động Activity (Activity Workflow)
+node "d:\Nexis\Training\archify\archify\bin\archify.mjs" deliver workflow "d:\Nexis\Training\System Design cho hệ thống PP Hub\pphub-onlyoffice-activity.json" "d:\Nexis\Training\System Design cho hệ thống PP Hub\pphub-onlyoffice-activity-demo.html" --quality showcase
+```

@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "PP Hub - Enterprise Document Management Architecture",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "full-topology",
+        "label": "Toàn bộ kiến trúc hệ thống PP Hub",
+        "focus": ["users", "proxy", "api", "onlyoffice", "postgres", "redis", "minio"],
+        "note": "Kiến trúc 5 tầng self-hosted đảm bảo bảo mật và hiệu năng."
+      },
+      {
+        "id": "office-editor",
+        "label": "Luồng chỉnh sửa OnlyOffice",
+        "focus": ["users", "proxy", "api", "onlyoffice", "minio"],
+        "note": "Tương tác giữa Browser, Nginx Gateway, Core API và OnlyOffice Engine."
+      },
+      {
+        "id": "data-persistence",
+        "label": "Lớp lưu trữ dữ liệu",
+        "focus": ["api", "worker", "postgres", "redis", "minio"],
+        "note": "Phân chia Metadata (Postgres), Caching/Lock (Redis) và Object Storage (MinIO)."
+      }
+    ]
+  },
+  "components": [
+    { "id": "users", "type": "external", "label": "Client Browsers", "sublabel": "React UI & Editor", "pos": [40, 240], "size": [140, 60] },
+    { "id": "proxy", "type": "cloud", "label": "Nginx Gateway", "sublabel": "Reverse Proxy :443", "pos": [250, 240], "size": [140, 60] },
+    { "id": "auth", "type": "security", "label": "Auth & ACL Engine", "sublabel": "JWT & Access Control", "pos": [480, 80], "size": [150, 60] },
+    { "id": "api", "type": "backend", "label": "Core API Gateway", "sublabel": "Node.js / Go Services", "pos": [480, 240], "size": [150, 60] },
+    { "id": "worker", "type": "backend", "label": "Background Worker", "sublabel": "Cron & TTL Cleanup", "pos": [480, 400], "size": [150, 60] },
+    { "id": "onlyoffice", "type": "backend", "label": "OnlyOffice Server", "sublabel": "WS Multi-user Engine", "pos": [250, 400], "size": [140, 60] },
+    { "id": "postgres", "type": "database", "label": "PostgreSQL 16", "sublabel": "Metadata & ACL Nodes", "pos": [780, 80], "size": [140, 60] },
+    { "id": "redis", "type": "database", "label": "Redis 7", "sublabel": "ACL Cache & Lock", "pos": [780, 240], "size": [140, 60] },
+    { "id": "minio", "type": "database", "label": "MinIO Object Storage", "sublabel": "File Blobs & Versions", "pos": [780, 400], "size": [140, 60] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "Client Layer", "wraps": ["users"] },
+    { "kind": "region", "label": "Edge Layer", "wraps": ["proxy"] },
+    { "kind": "security-group", "label": "PP Hub Core Services", "wraps": ["auth", "api", "worker"] },
+    { "kind": "region", "label": "Document Engine", "wraps": ["onlyoffice"] },
+    { "kind": "security-group", "label": "Persistence & Storage Layer", "wraps": ["postgres", "redis", "minio"] }
+  ],
+  "connections": [
+    { "id": "users-to-proxy", "from": "users", "to": "proxy", "label": "HTTPS / WS", "variant": "emphasis" },
+    { "id": "proxy-to-api", "from": "proxy", "to": "api", "label": "REST API" },
+    { "id": "proxy-to-oo", "from": "proxy", "to": "onlyoffice", "label": "Edit Frame", "fromSide": "bottom", "toSide": "top", "labelAt": [320, 335] },
+    { "id": "api-to-auth", "from": "api", "to": "auth", "label": "Check ACL", "variant": "security", "fromSide": "top", "toSide": "bottom", "labelDx": -35 },
+    { "id": "auth-to-db", "from": "auth", "to": "postgres", "label": "ACL Rules", "fromSide": "right", "toSide": "left" },
+    { "id": "api-to-postgres", "from": "api", "to": "postgres", "label": "SQL Query", "fromSide": "top", "toSide": "left" },
+    { "id": "api-to-redis", "from": "api", "to": "redis", "label": "Cache & Lock", "fromSide": "right", "toSide": "left" },
+    { "id": "api-to-minio", "from": "api", "to": "minio", "label": "File Blobs", "fromSide": "bottom", "toSide": "left" },
+    { "id": "oo-to-api", "from": "onlyoffice", "to": "api", "label": "Webhook", "fromSide": "right", "toSide": "bottom" },
+    { "id": "worker-to-minio", "from": "worker", "to": "minio", "label": "Clean Expired", "fromSide": "right", "toSide": "left" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "Client & Gateway Layer", "items": ["React UI quen thuộc như Google Drive", "Nginx đảm nhận SSL termination và reverse proxy"] },
+    { "dot": "emerald", "title": "Core Services & Editor Engine", "items": ["PP Hub Core API quản lý Metadata, ACL và Resumable Upload", "OnlyOffice Document Server xử lý đồng sửa thời gian thực qua WebSocket"] },
+    { "dot": "rose", "title": "Data Storage & Worker", "items": ["PostgreSQL 16 lưu trữ Cây thư mục và ACL Rules", "Redis 7 cache phân quyền < 5ms và Distributed Edit Locking", "MinIO Object Storage lưu trữ Blob tệp tin thực tế và Version History"] }
+  ]
+}

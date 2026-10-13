@@ -1,0 +1,1692 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PP Hub - OnlyOffice Activity &amp; Process Workflow</title>
+  <style>
+    /* ==========================================================================
+       DESIGN SYSTEM & CSS VARIABLES
+       Optimized for Single-Screen Viewport (100vh) - Clean, Modern, Premium
+       ========================================================================== */
+    :root {
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+      /* Dark Theme (Default) */
+      --bg-base: #0a0e17;
+      --bg-surface: #111827;
+      --bg-card: #162032;
+      --bg-card-hover: #1e293b;
+      --bg-input: #0f172a;
+      
+      --border-subtle: #1e293b;
+      --border-card: #283548;
+      --border-active: #38bdf8;
+
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+
+      /* Swimlane Colors */
+      --lane-ui: #0ea5e9;
+      --lane-ui-bg: rgba(14, 165, 233, 0.08);
+      --lane-backend: #a855f7;
+      --lane-backend-bg: rgba(168, 85, 247, 0.08);
+      --lane-oo: #10b981;
+      --lane-oo-bg: rgba(16, 185, 129, 0.08);
+      --lane-storage: #f59e0b;
+      --lane-storage-bg: rgba(245, 158, 11, 0.08);
+
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.35);
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+      --shadow-glow: 0 0 20px rgba(56, 189, 248, 0.25);
+    }
+
+    [data-theme="light"] {
+      --bg-base: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-card: #f1f5f9;
+      --bg-card-hover: #e2e8f0;
+      --bg-input: #ffffff;
+      
+      --border-subtle: #e2e8f0;
+      --border-card: #cbd5e1;
+      --border-active: #0284c7;
+
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-dim: #94a3b8;
+
+      --lane-ui: #0284c7;
+      --lane-ui-bg: rgba(2, 132, 199, 0.06);
+      --lane-backend: #7e22ce;
+      --lane-backend-bg: rgba(126, 34, 206, 0.06);
+      --lane-oo: #059669;
+      --lane-oo-bg: rgba(5, 150, 105, 0.06);
+      --lane-storage: #d97706;
+      --lane-storage-bg: rgba(217, 119, 6, 0.06);
+
+      --accent: #0284c7;
+      --accent-glow: rgba(2, 132, 199, 0.2);
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+      --shadow-glow: 0 0 15px rgba(2, 132, 199, 0.2);
+    }
+
+    /* Reset & Viewport Constraints */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100vh;
+      max-height: 100vh;
+      overflow: hidden;
+      font-family: var(--font-sans);
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ==========================================================================
+       TOP APP HEADER
+       ========================================================================== */
+    .app-header {
+      height: 52px;
+      min-height: 52px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+      gap: 16px;
+      z-index: 100;
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #0284c7, #38bdf8);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 14px;
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.4);
+    }
+
+    .brand-title {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-tag {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 12px;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+    }
+
+    /* Phase Tabs in Header */
+    .phase-filter-group {
+      display: flex;
+      align-items: center;
+      background: var(--bg-base);
+      padding: 3px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      gap: 2px;
+    }
+
+    .phase-tab-btn {
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: transparent;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .phase-tab-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .phase-tab-btn.active {
+      color: #fff;
+      background: var(--accent);
+      box-shadow: 0 1px 6px rgba(56, 189, 248, 0.4);
+    }
+
+    /* Simulation Control Toolbar */
+    .controls-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      height: 32px;
+      padding: 0 12px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-card);
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-card);
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #0b1120;
+      border-color: var(--accent);
+      font-weight: 700;
+    }
+
+    .btn-primary:hover {
+      background: #7dd3fc;
+      box-shadow: var(--shadow-glow);
+    }
+
+    .btn-icon {
+      width: 32px;
+      padding: 0;
+    }
+
+    .speed-badge {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: var(--bg-base);
+      color: var(--text-muted);
+      cursor: pointer;
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* ==========================================================================
+       MAIN WORKSPACE (Split 54% Canvas / 46% Inspector)
+       ========================================================================== */
+    .main-workspace {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* ==========================================================================
+       TOP SECTION: SWIMLANE WORKFLOW CANVAS
+       ========================================================================== */
+    .canvas-section {
+      flex: 1.15;
+      min-height: 0;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-base);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 8px 16px;
+    }
+
+    .canvas-container {
+      position: relative;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    /* SVG Overlay for Connections */
+    .connections-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .edge-line-bg {
+      stroke: var(--border-card);
+      stroke-width: 2.5;
+      fill: none;
+      stroke-linecap: round;
+      opacity: 0.6;
+    }
+
+    .edge-line-active {
+      stroke: var(--accent);
+      stroke-width: 3;
+      fill: none;
+      stroke-linecap: round;
+      stroke-dasharray: 6 6;
+      animation: flowDashes 0.8s linear infinite;
+      filter: drop-shadow(0 0 6px var(--accent));
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .edge-line-active.visible {
+      opacity: 1;
+    }
+
+    @keyframes flowDashes {
+      to {
+        stroke-dashoffset: -12;
+      }
+    }
+
+    /* Swimlanes */
+    .swimlane {
+      position: relative;
+      flex: 1;
+      display: grid;
+      grid-template-columns: 190px repeat(8, 1fr);
+      align-items: center;
+      gap: 10px;
+      border-radius: var(--radius-md);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      padding: 0 12px;
+      transition: all 0.2s ease;
+    }
+
+    .swimlane:hover {
+      border-color: var(--border-card);
+    }
+
+    .swimlane.active-lane {
+      border-color: rgba(56, 189, 248, 0.4);
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.08);
+    }
+
+    .lane-label-col {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-right: 8px;
+      border-right: 1px dashed var(--border-subtle);
+      height: 70%;
+    }
+
+    .lane-icon-box {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+
+    .lane-info {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .lane-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .lane-desc {
+      font-size: 10px;
+      color: var(--text-dim);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Node Cards */
+    .node-slot {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      position: relative;
+      z-index: 20;
+    }
+
+    .node-card {
+      width: 100%;
+      max-width: 135px;
+      height: 58px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-sm);
+      padding: 6px 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .node-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent);
+      background: var(--bg-card-hover);
+    }
+
+    .node-card.dimmed {
+      opacity: 0.3;
+      filter: grayscale(0.5);
+    }
+
+    .node-card.active-node {
+      border-color: var(--accent);
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 16px var(--accent-glow), 0 0 0 2px var(--accent);
+      transform: translateY(-2px) scale(1.03);
+    }
+
+    .node-card.completed-node {
+      border-color: rgba(16, 185, 129, 0.6);
+    }
+
+    .node-card.completed-node::after {
+      content: "✓";
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      width: 14px;
+      height: 14px;
+      background: var(--success);
+      color: #fff;
+      font-size: 9px;
+      font-weight: bold;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    }
+
+    .node-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+      margin-bottom: 2px;
+    }
+
+    .node-step-badge {
+      font-size: 9px;
+      font-family: var(--font-mono);
+      font-weight: 800;
+      padding: 1px 4px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+    }
+
+    .node-card.active-node .node-step-badge {
+      background: var(--accent);
+      color: #0b1120;
+    }
+
+    .node-tag {
+      font-size: 8.5px;
+      font-weight: 600;
+      color: var(--text-dim);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .node-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.2;
+    }
+
+    .node-subtitle {
+      font-size: 9.5px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 1px;
+    }
+
+    /* Lane Theme Accents */
+    .lane-ui-theme .lane-icon-box { background: var(--lane-ui-bg); color: var(--lane-ui); border: 1px solid rgba(14, 165, 233, 0.3); }
+    .lane-backend-theme .lane-icon-box { background: var(--lane-backend-bg); color: var(--lane-backend); border: 1px solid rgba(168, 85, 247, 0.3); }
+    .lane-oo-theme .lane-icon-box { background: var(--lane-oo-bg); color: var(--lane-oo); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .lane-storage-theme .lane-icon-box { background: var(--lane-storage-bg); color: var(--lane-storage); border: 1px solid rgba(245, 158, 11, 0.3); }
+
+    /* ==========================================================================
+       BOTTOM SECTION: INSPECTOR & LIVE METRICS (Zero window scroll)
+       ========================================================================== */
+    .inspector-section {
+      flex: 0.95;
+      min-height: 230px;
+      max-height: 280px;
+      background: var(--bg-surface);
+      display: grid;
+      grid-template-columns: 1.1fr 1.35fr 0.95fr;
+      gap: 12px;
+      padding: 10px 16px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .inspector-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.12);
+    }
+
+    .card-title {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .card-body {
+      flex: 1;
+      padding: 10px 12px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* Custom subtle scrollbar */
+    .card-body::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .card-body::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .card-body::-webkit-scrollbar-thumb {
+      background: var(--border-card);
+      border-radius: 4px;
+    }
+
+    /* Detail Inspector (Col 1) */
+    .step-hero {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .step-number-large {
+      font-family: var(--font-mono);
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--accent);
+      background: rgba(56, 189, 248, 0.1);
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      flex-shrink: 0;
+    }
+
+    .step-title-wrap h3 {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.2;
+    }
+
+    .step-meta-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 4px;
+    }
+
+    .pill {
+      font-size: 9.5px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+    }
+
+    .pill-accent {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      border-color: rgba(56, 189, 248, 0.3);
+    }
+
+    .step-desc-text {
+      font-size: 11.5px;
+      line-height: 1.45;
+      color: var(--text-muted);
+      background: var(--bg-surface);
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      border-left: 3px solid var(--accent);
+    }
+
+    .step-kv-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+      margin-top: auto;
+    }
+
+    .kv-item {
+      background: var(--bg-surface);
+      padding: 5px 8px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .kv-label {
+      font-size: 9px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .kv-val {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Live Payload Code Box (Col 2) */
+    .code-box {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      line-height: 1.4;
+      background: var(--bg-input);
+      color: #e2e8f0;
+      padding: 10px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      flex: 1;
+      overflow: auto;
+      white-space: pre;
+    }
+
+    .copy-btn {
+      font-size: 10px;
+      padding: 2px 8px;
+      height: 22px;
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .copy-btn:hover {
+      background: var(--bg-card);
+      color: var(--text-main);
+    }
+
+    /* Timeline & Status (Col 3) */
+    .metrics-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .metric-chip {
+      flex: 1;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 6px;
+      text-align: center;
+    }
+
+    .metric-value {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--success);
+    }
+
+    .metric-label {
+      font-size: 9.5px;
+      color: var(--text-dim);
+    }
+
+    .timeline-log {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+    }
+
+    .log-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      padding: 3px 6px;
+      border-radius: 4px;
+      background: var(--bg-surface);
+      border-left: 2px solid var(--border-card);
+      line-height: 1.3;
+    }
+
+    .log-item.active-log {
+      border-left-color: var(--accent);
+      background: rgba(56, 189, 248, 0.08);
+      color: var(--text-main);
+    }
+
+    .log-time {
+      color: var(--text-dim);
+      font-size: 9px;
+      flex-shrink: 0;
+    }
+
+    /* Keyboard Guide Tooltip */
+    .kbd {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-card);
+      padding: 1px 4px;
+      border-radius: 3px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========================================================================
+       TOP NAVIGATION BAR
+       ======================================================================== -->
+  <header class="app-header">
+    <div class="brand-section">
+      <div class="brand-logo">PP</div>
+      <div class="brand-title">
+        PP Hub - OnlyOffice Activity Workflow
+        <span class="brand-tag">Real-time Collab</span>
+      </div>
+    </div>
+
+    <!-- Phase Selector Tabs -->
+    <div class="phase-filter-group" role="tablist">
+      <button class="phase-tab-btn active" data-phase="all">Toàn Bộ Quy Trình (1-8)</button>
+      <button class="phase-tab-btn" data-phase="phase1">1. Khởi Tạo &amp; Phân Quyền</button>
+      <button class="phase-tab-btn" data-phase="phase2">2. Stream &amp; Đồng Sửa</button>
+      <button class="phase-tab-btn" data-phase="phase3">3. Lưu &amp; Đóng Version</button>
+    </div>
+
+    <!-- Simulation Controls -->
+    <div class="controls-group">
+      <button id="btn-prev" class="btn btn-icon" title="Bước trước (Phím Mũi tên Trái)">⏮</button>
+      <button id="btn-play" class="btn btn-primary" title="Tự động chạy mô phỏng (Phím Space)">
+        <span id="play-icon">▶</span>
+        <span id="play-text">Chạy Mô Phỏng</span>
+      </button>
+      <button id="btn-next" class="btn btn-icon" title="Bước tiếp theo (Phím Mũi tên Phải)">⏭</button>
+      <button id="btn-reset" class="btn btn-icon" title="Đặt lại từ đầu (Phím R)">↺</button>
+      
+      <div style="width: 1px; height: 18px; background: var(--border-subtle); margin: 0 4px;"></div>
+      
+      <button id="btn-speed" class="speed-badge" title="Tốc độ mô phỏng">1.0x</button>
+      <button id="btn-theme" class="btn btn-icon" title="Chuyển chế độ Sáng / Tối (Phím T)">🌙</button>
+      <button id="btn-fullscreen" class="btn btn-icon" title="Toàn màn hình">⛶</button>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       MAIN WORKSPACE: SWIMLANE CANVAS + INSPECTOR
+       ======================================================================== -->
+  <main class="main-workspace">
+
+    <!-- UPPER SECTION: 4 ARCHITECTURAL SWIMLANES -->
+    <section class="canvas-section">
+      <div class="canvas-container" id="canvas-container">
+        
+        <!-- SVG Interactive Connecting Edges -->
+        <svg class="connections-svg" id="connections-svg">
+          <!-- Background Paths -->
+          <path id="edge-bg-1" class="edge-line-bg"></path>
+          <path id="edge-bg-2" class="edge-line-bg"></path>
+          <path id="edge-bg-3" class="edge-line-bg"></path>
+          <path id="edge-bg-4" class="edge-line-bg"></path>
+          <path id="edge-bg-5" class="edge-line-bg"></path>
+          <path id="edge-bg-6" class="edge-line-bg"></path>
+          <path id="edge-bg-7" class="edge-line-bg"></path>
+
+          <!-- Active Animated Pulse Paths -->
+          <path id="edge-active-1" class="edge-line-active"></path>
+          <path id="edge-active-2" class="edge-line-active"></path>
+          <path id="edge-active-3" class="edge-line-active"></path>
+          <path id="edge-active-4" class="edge-line-active"></path>
+          <path id="edge-active-5" class="edge-line-active"></path>
+          <path id="edge-active-6" class="edge-line-active"></path>
+          <path id="edge-active-7" class="edge-line-active"></path>
+        </svg>
+
+        <!-- SWIMLANE 1: REACT WEB UI -->
+        <div class="swimlane lane-ui-theme" data-lane="ui" id="lane-ui">
+          <div class="lane-label-col">
+            <div class="lane-icon-box">💻</div>
+            <div class="lane-info">
+              <span class="lane-name">React Web UI</span>
+              <span class="lane-desc">Browser Client Layer</span>
+            </div>
+          </div>
+
+          <!-- Col 0: Step 1 -->
+          <div class="node-slot" data-col="0">
+            <div class="node-card" id="node-1" data-step="1" data-phase="phase1">
+              <div class="node-header">
+                <span class="node-step-badge">01</span>
+                <span class="node-tag">User Action</span>
+              </div>
+              <div class="node-title">Mở Tài Liệu</div>
+              <div class="node-subtitle">Click .docx / .xlsx</div>
+            </div>
+          </div>
+
+          <!-- Col 1 to 4: Empty slots -->
+          <div class="node-slot" data-col="1"></div>
+          <div class="node-slot" data-col="2"></div>
+          <div class="node-slot" data-col="3"></div>
+          <div class="node-slot" data-col="4"></div>
+
+          <!-- Col 5: Step 6 -->
+          <div class="node-slot" data-col="5">
+            <div class="node-card" id="node-6" data-step="6" data-phase="phase3">
+              <div class="node-header">
+                <span class="node-step-badge">06</span>
+                <span class="node-tag">User Event</span>
+              </div>
+              <div class="node-title">Lưu Tài Liệu</div>
+              <div class="node-subtitle">Ctrl+S / Đóng tab</div>
+            </div>
+          </div>
+
+          <!-- Col 6 & 7: Empty slots -->
+          <div class="node-slot" data-col="6"></div>
+          <div class="node-slot" data-col="7"></div>
+        </div>
+
+        <!-- SWIMLANE 2: CORE SERVICES (API Gateway & Auth) -->
+        <div class="swimlane lane-backend-theme" data-lane="backend" id="lane-backend">
+          <div class="lane-label-col">
+            <div class="lane-icon-box">🛡️</div>
+            <div class="lane-info">
+              <span class="lane-name">PP Hub Core API</span>
+              <span class="lane-desc">Gateway &amp; ACL Engine</span>
+            </div>
+          </div>
+
+          <!-- Col 0: Empty -->
+          <div class="node-slot" data-col="0"></div>
+
+          <!-- Col 1: Step 2 -->
+          <div class="node-slot" data-col="1">
+            <div class="node-card" id="node-2" data-step="2" data-phase="phase1">
+              <div class="node-header">
+                <span class="node-step-badge">02</span>
+                <span class="node-tag">Check ACL</span>
+              </div>
+              <div class="node-title">Kiểm Tra Quyền</div>
+              <div class="node-subtitle">Verify JWT &amp; EDITOR</div>
+            </div>
+          </div>
+
+          <!-- Col 2 to 7: Empty -->
+          <div class="node-slot" data-col="2"></div>
+          <div class="node-slot" data-col="3"></div>
+          <div class="node-slot" data-col="4"></div>
+          <div class="node-slot" data-col="5"></div>
+          <div class="node-slot" data-col="6"></div>
+          <div class="node-slot" data-col="7"></div>
+        </div>
+
+        <!-- SWIMLANE 3: ONLYOFFICE ENGINE (Docker Container) -->
+        <div class="swimlane lane-oo-theme" data-lane="editing" id="lane-editing">
+          <div class="lane-label-col">
+            <div class="lane-icon-box">📄</div>
+            <div class="lane-info">
+              <span class="lane-name">OnlyOffice Engine</span>
+              <span class="lane-desc">Document Server Docker</span>
+            </div>
+          </div>
+
+          <!-- Col 0 & 1: Empty -->
+          <div class="node-slot" data-col="0"></div>
+          <div class="node-slot" data-col="1"></div>
+
+          <!-- Col 2: Step 3 -->
+          <div class="node-slot" data-col="2">
+            <div class="node-card" id="node-3" data-step="3" data-phase="phase1">
+              <div class="node-header">
+                <span class="node-step-badge">03</span>
+                <span class="node-tag">DocsAPI Frame</span>
+              </div>
+              <div class="node-title">Khởi Tạo Editor</div>
+              <div class="node-subtitle">Nhúng iFrame Config</div>
+            </div>
+          </div>
+
+          <!-- Col 3: Empty -->
+          <div class="node-slot" data-col="3"></div>
+
+          <!-- Col 4: Step 5 -->
+          <div class="node-slot" data-col="4">
+            <div class="node-card" id="node-5" data-step="5" data-phase="phase2">
+              <div class="node-header">
+                <span class="node-step-badge">05</span>
+                <span class="node-tag">WebSocket WS</span>
+              </div>
+              <div class="node-title">Đồng Sửa Realtime</div>
+              <div class="node-subtitle">Multi-user Sync</div>
+            </div>
+          </div>
+
+          <!-- Col 5: Empty -->
+          <div class="node-slot" data-col="5"></div>
+
+          <!-- Col 6: Step 7 -->
+          <div class="node-slot" data-col="6">
+            <div class="node-card" id="node-7" data-step="7" data-phase="phase3">
+              <div class="node-header">
+                <span class="node-step-badge">07</span>
+                <span class="node-tag">Webhook Post</span>
+              </div>
+              <div class="node-title">Webhook Callback</div>
+              <div class="node-subtitle">Gửi file sửa về Core</div>
+            </div>
+          </div>
+
+          <!-- Col 7: Empty -->
+          <div class="node-slot" data-col="7"></div>
+        </div>
+
+        <!-- SWIMLANE 4: STORAGE LAYER (MinIO Blob & PostgreSQL) -->
+        <div class="swimlane lane-storage-theme" data-lane="storage" id="lane-storage">
+          <div class="lane-label-col">
+            <div class="lane-icon-box">🗄️</div>
+            <div class="lane-info">
+              <span class="lane-name">Lớp Lưu Trữ</span>
+              <span class="lane-desc">MinIO Blob &amp; PostgreSQL</span>
+            </div>
+          </div>
+
+          <!-- Col 0, 1, 2: Empty -->
+          <div class="node-slot" data-col="0"></div>
+          <div class="node-slot" data-col="1"></div>
+          <div class="node-slot" data-col="2"></div>
+
+          <!-- Col 3: Step 4 -->
+          <div class="node-slot" data-col="3">
+            <div class="node-card" id="node-4" data-step="4" data-phase="phase2">
+              <div class="node-header">
+                <span class="node-step-badge">04</span>
+                <span class="node-tag">MinIO S3</span>
+              </div>
+              <div class="node-title">Stream Blob Gốc</div>
+              <div class="node-subtitle">Tải file từ MinIO</div>
+            </div>
+          </div>
+
+          <!-- Col 4, 5, 6: Empty -->
+          <div class="node-slot" data-col="4"></div>
+          <div class="node-slot" data-col="5"></div>
+          <div class="node-slot" data-col="6"></div>
+
+          <!-- Col 7: Step 8 -->
+          <div class="node-slot" data-col="7">
+            <div class="node-card" id="node-8" data-step="8" data-phase="phase3">
+              <div class="node-header">
+                <span class="node-step-badge">08</span>
+                <span class="node-tag">Postgres v+1</span>
+              </div>
+              <div class="node-title">Lưu Version Mới</div>
+              <div class="node-subtitle">Tăng v+1 &amp; MinIO Blob</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- LOWER SECTION: LIVE DETAILS INSPECTOR & TERMINAL (3-Panel Grid) -->
+    <section class="inspector-section">
+      
+      <!-- PANEL 1: STEP DETAIL INSPECTOR -->
+      <div class="inspector-card">
+        <div class="card-header">
+          <span class="card-title">🔍 Chi Tiết Bước Đang Chọn</span>
+          <span class="pill pill-accent" id="inspector-phase-badge">Phase 1</span>
+        </div>
+        <div class="card-body">
+          <div class="step-hero">
+            <div class="step-number-large" id="inspector-step-num">01</div>
+            <div class="step-title-wrap">
+              <h3 id="inspector-step-title">Mở Tài Liệu</h3>
+              <div class="step-meta-pills">
+                <span class="pill" id="inspector-lane-pill">React Web UI</span>
+                <span class="pill pill-accent" id="inspector-proto-pill">User Event</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-desc-text" id="inspector-step-desc">
+            Người dùng click vào tệp tin Office (.docx, .xlsx) trên giao diện React Web UI. Trình duyệt gửi yêu cầu cấp quyền và lấy cấu hình soạn thảo.
+          </div>
+
+          <div class="step-kv-grid">
+            <div class="kv-item">
+              <div class="kv-label">Tác Nhân Thực Hiện</div>
+              <div class="kv-val" id="inspector-actor">Browser Client</div>
+            </div>
+            <div class="kv-item">
+              <div class="kv-label">API / Protocol</div>
+              <div class="kv-val" id="inspector-endpoint">Client UI Event</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANEL 2: LIVE PAYLOAD & CONTRACT TERMINAL -->
+      <div class="inspector-card">
+        <div class="card-header">
+          <span class="card-title">📦 Payload &amp; Dữ Liệu Trao Đổi</span>
+          <button class="copy-btn" id="btn-copy-code" title="Sao chép nội dung">📋 Sao chép</button>
+        </div>
+        <div class="card-body" style="padding: 6px;">
+          <pre class="code-box" id="inspector-code"></pre>
+        </div>
+      </div>
+
+      <!-- PANEL 3: REAL-TIME TIMELINE & HEALTH -->
+      <div class="inspector-card">
+        <div class="card-header">
+          <span class="card-title">⚡ Nhật Ký Hoạt Động (Event Log)</span>
+          <span style="font-size: 10px; color: var(--success); font-weight: 700;">● Online</span>
+        </div>
+        <div class="card-body">
+          <!-- Metrics -->
+          <div class="metrics-row">
+            <div class="metric-chip">
+              <div class="metric-value" id="metric-latency">18 ms</div>
+              <div class="metric-label">Độ trễ API</div>
+            </div>
+            <div class="metric-chip">
+              <div class="metric-value" id="metric-status">200 OK</div>
+              <div class="metric-label">Trạng thái</div>
+            </div>
+            <div class="metric-chip">
+              <div class="metric-value" id="metric-version">v1.0</div>
+              <div class="metric-label">Phiên bản File</div>
+            </div>
+          </div>
+
+          <!-- Event Log Stream -->
+          <div class="timeline-log" id="timeline-log">
+            <!-- Populated via JavaScript -->
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ========================================================================
+       JAVASCRIPT LOGIC - COMPACT, REACTIVE, FAST
+       ======================================================================== -->
+  <script>
+    (function () {
+      'use strict';
+
+      // --- STEP SPECIFICATION DATA ---
+      const STEPS = [
+        {
+          id: 1,
+          nodeId: 'node-1',
+          title: 'Mở Tài Liệu Trực Tuyến',
+          subtitle: 'Click file .docx / .xlsx',
+          lane: 'React Web UI',
+          laneId: 'ui',
+          phase: 'phase1',
+          phaseLabel: '1. Khởi Tạo & Phân Quyền',
+          protocol: 'User Browser Event',
+          actor: 'Nhân viên (Client Web)',
+          endpoint: 'Event: click(file_id)',
+          latency: '4 ms',
+          status: 'Triggered',
+          version: 'v1.0 (Gốc)',
+          desc: 'Người dùng chọn mở tài liệu "Bao_cao_taichinh.xlsx" trên React Web UI. Trình duyệt chuẩn bị gửi yêu cầu cấp quyền và lấy cấu hình mở file qua API.',
+          code: `// 1. Client Event Trigger
+const handleOpenFile = async (file) => {
+  console.log("Mở file:", file.name, file.id);
+  // Gửi request tới PP Hub API Gateway
+  const res = await api.get('/editors/onlyoffice/config', {
+    params: { file_id: "node-001" }
+  });
+  initOnlyOfficeFrame(res.data);
+};`
+        },
+        {
+          id: 2,
+          nodeId: 'node-2',
+          title: 'Kiểm Tra Quyền ACL & Cấp Config',
+          subtitle: 'Verify JWT & Role EDITOR',
+          lane: 'PP Hub Core Services',
+          laneId: 'backend',
+          phase: 'phase1',
+          phaseLabel: '1. Khởi Tạo & Phân Quyền',
+          protocol: 'REST API (HTTPS)',
+          actor: 'API Gateway & Auth',
+          endpoint: 'GET /api/v1/editors/onlyoffice/config',
+          latency: '24 ms',
+          status: '200 OK',
+          version: 'v1.0 (Gốc)',
+          desc: 'Core API xác thực JWT Token của người dùng, tra cứu Redis cache bảng ACL. Xác nhận user có quyền EDITOR, API tạo link tải nội bộ và sinh Config JSON cho OnlyOffice.',
+          code: `// 2. Core API Response: OnlyOffice Configuration
+{
+  "document": {
+    "fileType": "xlsx",
+    "key": "file-v1-hash-a8f92b",
+    "title": "Bao_cao_taichinh.xlsx",
+    "url": "https://pphub.local/api/v1/files/node-001/download-internal?token=jwt_sec_892"
+  },
+  "editorConfig": {
+    "callbackUrl": "https://pphub.local/api/v1/editors/onlyoffice/callback?file_id=node-001",
+    "user": { "id": "u-45", "name": "Tran Van B" },
+    "mode": "edit",
+    "lang": "vi"
+  }
+}`
+        },
+        {
+          id: 3,
+          nodeId: 'node-3',
+          title: 'Khởi Tạo OnlyOffice Editor Frame',
+          subtitle: 'Nhúng DocsAPI iFrame',
+          lane: 'OnlyOffice Engine',
+          laneId: 'editing',
+          phase: 'phase1',
+          phaseLabel: '1. Khởi Tạo & Phân Quyền',
+          protocol: 'DocsAPI SDK / iFrame',
+          actor: 'OnlyOffice Document Server',
+          endpoint: 'DocsAPI.DocEditor()',
+          latency: '45 ms',
+          status: 'Frame Mounted',
+          version: 'v1.0 (Gốc)',
+          desc: 'React Web UI nạp SDK của OnlyOffice và nhúng <iframe> Document Server vào trang web, truyền kèm Config JSON vừa nhận từ Backend.',
+          code: `// 3. Khởi tạo Document Server Frame
+const docEditor = new DocsAPI.DocEditor("iframeContainer", {
+  type: "desktop",
+  width: "100%",
+  height: "100%",
+  documentType: "cell",
+  document: config.document,
+  editorConfig: {
+    ...config.editorConfig,
+    customization: {
+      autosave: true,
+      chat: true,
+      comments: true
+    }
+  }
+});`
+        },
+        {
+          id: 4,
+          nodeId: 'node-4',
+          title: 'Stream File Blob Gốc từ MinIO',
+          subtitle: 'Tải file từ MinIO Storage',
+          lane: 'Lớp Lưu Trữ',
+          laneId: 'storage',
+          phase: 'phase2',
+          phaseLabel: '2. Stream & Đồng Sửa',
+          protocol: 'S3 API / Internal HTTP',
+          actor: 'MinIO Object Storage',
+          endpoint: 'S3: GetObject(/sp-dev/hash_v1)',
+          latency: '68 ms',
+          status: '200 OK (Stream)',
+          version: 'v1.0 (Gốc)',
+          desc: 'OnlyOffice Server gọi ngược về Core API với Token tải nội bộ. Backend lấy file Blob nhị phân từ MinIO Object Storage theo hash và stream trực tiếp về OnlyOffice để giải mã hiển thị.',
+          code: `// 4. MinIO S3 Object Fetch
+GET /api/v1/files/node-001/download-internal HTTP/1.1
+Host: pphub.local
+Authorization: Bearer jwt_sec_892
+
+HTTP/1.1 200 OK
+Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+Content-Length: 1048576
+ETag: "hash_v1_a8f92b"
+[Binary Stream: 1.05 MB transferred to Document Server]`
+        },
+        {
+          id: 5,
+          nodeId: 'node-5',
+          title: 'Đồng Sửa Real-time Qua WebSocket',
+          subtitle: 'Multi-user Live Sync',
+          lane: 'OnlyOffice Engine',
+          laneId: 'editing',
+          phase: 'phase2',
+          phaseLabel: '2. Stream & Đồng Sửa',
+          protocol: 'WebSocket (WSS)',
+          actor: 'Document Server Engine',
+          endpoint: 'wss://pphub.local/onlyoffice/ws',
+          latency: '22 ms',
+          status: 'Connected (2 Users)',
+          version: 'v1.0 (Live Co-edit)',
+          desc: 'OnlyOffice điều phối phiên đồng sửa thời gian thực qua kênh WebSocket. Mọi thao tác gõ phím, di chuyển ô tính của các thành viên được đồng nhất với độ trễ dưới 50ms.',
+          code: `// 5. WebSocket Sync Frame
+{
+  "event": "coedit_sync",
+  "doc_key": "file-v1-hash-a8f92b",
+  "collaborators": [
+    { "user_id": "u-45", "name": "Tran Van B", "cell": "D15", "color": "#0ea5e9" },
+    { "user_id": "u-12", "name": "Nguyen Thi C", "cell": "D18", "color": "#10b981" }
+  ],
+  "delta": "Cell D15 updated: 1,250,000,000 VND",
+  "sync_latency_ms": 22
+}`
+        },
+        {
+          id: 6,
+          nodeId: 'node-6',
+          title: 'Kết Thúc Chỉnh Sửa / Bấm Lưu',
+          subtitle: 'Ctrl+S hoặc Đóng Tab',
+          lane: 'React Web UI',
+          laneId: 'ui',
+          phase: 'phase3',
+          phaseLabel: '3. Lưu & Đóng Phiên Bản',
+          protocol: 'Client Action',
+          actor: 'Nhân viên (Client Web)',
+          endpoint: 'Event: Ctrl+S / Unload',
+          latency: '6 ms',
+          status: 'Commit Initiated',
+          version: 'v1.0 -> v2.0',
+          desc: 'Người dùng hoàn tất nhập liệu, bấm tổ hợp Ctrl+S hoặc đóng tab trình duyệt. iFrame OnlyOffice phát lệnh đóng gói tệp tin mới để chuẩn bị lưu trữ phiên bản.',
+          code: `// 6. User Save Action Trigger
+document.addEventListener("keydown", (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+    e.preventDefault();
+    console.log("Ctrl + S: Yêu cầu lưu tài liệu ngay lập tức");
+    docEditor.downloadAs("xlsx"); // Kích hoạt OnlyOffice flush buffer
+  }
+});`
+        },
+        {
+          id: 7,
+          nodeId: 'node-7',
+          title: 'OnlyOffice Webhook Callback Về Core',
+          subtitle: 'Callback Status = 2',
+          lane: 'OnlyOffice Engine',
+          laneId: 'editing',
+          phase: 'phase3',
+          phaseLabel: '3. Lưu & Đóng Phiên Bản',
+          protocol: 'HTTP POST (Webhook)',
+          actor: 'Document Server Engine',
+          endpoint: 'POST /api/v1/editors/onlyoffice/callback',
+          latency: '85 ms',
+          status: '200 { error: 0 }',
+          version: 'v2.0 (Processing)',
+          desc: 'OnlyOffice tự động gọi Webhook POST về Core API kèm mã status = 2 (tài liệu sẵn sàng lưu) và đường link tải tệp tin đã chỉnh sửa từ bộ nhớ đệm container.',
+          code: `// 7. OnlyOffice Webhook Callback Payload
+POST /api/v1/editors/onlyoffice/callback?file_id=node-001 HTTP/1.1
+Content-Type: application/json
+
+{
+  "status": 2, // 2: Tài liệu đã sẵn sàng để lưu
+  "key": "file-v1-hash-a8f92b",
+  "url": "http://onlyoffice.internal/cache/node001_edited.xlsx",
+  "users": ["u-45", "u-12"],
+  "history": {
+    "serverVersion": "7.5.1",
+    "changes": [{ "created": "2026-10-12T19:24:50Z", "user": { "id": "u-45" } }]
+  }
+}`
+        },
+        {
+          id: 8,
+          nodeId: 'node-8',
+          title: 'Lưu Version Mới Vào MinIO & Postgres',
+          subtitle: 'Tăng Version v+1 & Audit Log',
+          lane: 'Lớp Lưu Trữ',
+          laneId: 'storage',
+          phase: 'phase3',
+          phaseLabel: '3. Lưu & Đóng Phiên Bản',
+          protocol: 'SQL TX & S3 PutObject',
+          actor: 'MinIO Blob & PostgreSQL',
+          endpoint: 'SQL: INSERT file_versions (+1)',
+          latency: '112 ms',
+          status: 'Committed v2.0',
+          version: 'v2.0 (Thành công)',
+          desc: 'Core API tải tệp mới từ URL callback, ghi vào MinIO Blob Storage, tạo bản ghi phiên bản mới (v2) trong PostgreSQL và lưu vết Audit Log. Phản hồi status 0 cho OnlyOffice hoàn tất.',
+          code: `// 8. Lưu Version Mới & Ghi Audit Log
+BEGIN TRANSACTION;
+-- 1. Lưu Blob mới vào MinIO: /storage/sp-dev/hash_v2_f9104b.xlsx
+-- 2. Cập nhật bảng Nodes
+UPDATE nodes 
+SET version = 2, size_bytes = 1065400, updated_at = NOW() 
+WHERE id = 'node-001';
+
+-- 3. Ghi vết lịch sử phiên bản
+INSERT INTO file_versions (id, node_id, version, size_bytes, hash_key, created_by)
+VALUES ('ver-002', 'node-001', 2, 1065400, 'hash_v2_f9104b', 'u-45');
+
+-- 4. Ghi Audit Log bảo mật
+INSERT INTO audit_logs (action, target_id, user_id, details)
+VALUES ('FILE_SAVE', 'node-001', 'u-45', 'Lưu thành công phiên bản 2 qua OnlyOffice');
+COMMIT;`
+        }
+      ];
+
+      // --- STATE MANAGEMENT ---
+      let currentStepIndex = 0; // 0 to 7 (corresponds to Step 1 to 8)
+      let isPlaying = false;
+      let playTimer = null;
+      let speedMultiplier = 1.0;
+      let activePhase = 'all';
+
+      // --- DOM REFERENCES ---
+      const dom = {
+        btnPlay: document.getElementById('btn-play'),
+        playIcon: document.getElementById('play-icon'),
+        playText: document.getElementById('play-text'),
+        btnPrev: document.getElementById('btn-prev'),
+        btnNext: document.getElementById('btn-next'),
+        btnReset: document.getElementById('btn-reset'),
+        btnSpeed: document.getElementById('btn-speed'),
+        btnTheme: document.getElementById('btn-theme'),
+        btnFullscreen: document.getElementById('btn-fullscreen'),
+        btnCopyCode: document.getElementById('btn-copy-code'),
+        phaseTabs: document.querySelectorAll('.phase-tab-btn'),
+        nodeCards: document.querySelectorAll('.node-card'),
+        swimlanes: document.querySelectorAll('.swimlane'),
+        svg: document.getElementById('connections-svg'),
+        
+        // Inspector
+        inspectorStepNum: document.getElementById('inspector-step-num'),
+        inspectorStepTitle: document.getElementById('inspector-step-title'),
+        inspectorPhaseBadge: document.getElementById('inspector-phase-badge'),
+        inspectorLanePill: document.getElementById('inspector-lane-pill'),
+        inspectorProtoPill: document.getElementById('inspector-proto-pill'),
+        inspectorStepDesc: document.getElementById('inspector-step-desc'),
+        inspectorActor: document.getElementById('inspector-actor'),
+        inspectorEndpoint: document.getElementById('inspector-endpoint'),
+        inspectorCode: document.getElementById('inspector-code'),
+        metricLatency: document.getElementById('metric-latency'),
+        metricStatus: document.getElementById('metric-status'),
+        metricVersion: document.getElementById('metric-version'),
+        timelineLog: document.getElementById('timeline-log')
+      };
+
+      // --- CONNECTION CURVE DRAWING ---
+      function updateSvgConnections() {
+        const svgRect = dom.svg.getBoundingClientRect();
+        if (!svgRect.width || !svgRect.height) return;
+
+        for (let i = 1; i <= 7; i++) {
+          const fromNode = document.getElementById(`node-${i}`);
+          const toNode = document.getElementById(`node-${i + 1}`);
+          const bgPath = document.getElementById(`edge-bg-${i}`);
+          const activePath = document.getElementById(`edge-active-${i}`);
+
+          if (!fromNode || !toNode || !bgPath || !activePath) continue;
+
+          const r1 = fromNode.getBoundingClientRect();
+          const r2 = toNode.getBoundingClientRect();
+
+          // Anchor points: Right center of fromNode, Left center of toNode
+          const x1 = (r1.right - svgRect.left);
+          const y1 = (r1.top + r1.height / 2 - svgRect.top);
+          const x2 = (r2.left - svgRect.left);
+          const y2 = (r2.top + r2.height / 2 - svgRect.top);
+
+          const dx = Math.max(30, Math.abs(x2 - x1) * 0.5);
+          const d = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
+
+          bgPath.setAttribute('d', d);
+          activePath.setAttribute('d', d);
+
+          // Highlight active edge if transitioning
+          if (i === currentStepIndex) {
+            activePath.classList.add('visible');
+          } else {
+            activePath.classList.remove('visible');
+          }
+        }
+      }
+
+      // --- RENDER INSPECTOR & ACTIVE STEP ---
+      function renderStep(index, addLog = true) {
+        if (index < 0) index = 0;
+        if (index >= STEPS.length) index = STEPS.length - 1;
+        currentStepIndex = index;
+        const step = STEPS[currentStepIndex];
+
+        // 1. Update Node Card Classes
+        dom.nodeCards.forEach((card, idx) => {
+          card.classList.remove('active-node', 'completed-node');
+          if (idx === currentStepIndex) {
+            card.classList.add('active-node');
+          } else if (idx < currentStepIndex) {
+            card.classList.add('completed-node');
+          }
+        });
+
+        // 2. Highlight Active Swimlane
+        dom.swimlanes.forEach(lane => {
+          if (lane.getAttribute('data-lane') === step.laneId) {
+            lane.classList.add('active-lane');
+          } else {
+            lane.classList.remove('active-lane');
+          }
+        });
+
+        // 3. Update Detail Inspector
+        dom.inspectorStepNum.textContent = String(step.id).padStart(2, '0');
+        dom.inspectorStepTitle.textContent = step.title;
+        dom.inspectorPhaseBadge.textContent = step.phaseLabel;
+        dom.inspectorLanePill.textContent = step.lane;
+        dom.inspectorProtoPill.textContent = step.protocol;
+        dom.inspectorStepDesc.textContent = step.desc;
+        dom.inspectorActor.textContent = step.actor;
+        dom.inspectorEndpoint.textContent = step.endpoint;
+        dom.inspectorCode.textContent = step.code;
+
+        // 4. Update Metrics
+        dom.metricLatency.textContent = step.latency;
+        dom.metricStatus.textContent = step.status;
+        dom.metricVersion.textContent = step.version;
+
+        // 5. Append Timeline Event Log
+        if (addLog) {
+          const now = new Date();
+          const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}.${String(Math.floor(now.getMilliseconds()/10)).padStart(2,'0')}`;
+          
+          const logEntry = document.createElement('div');
+          logEntry.className = 'log-item active-log';
+          logEntry.innerHTML = `<span class="log-time">${timeStr}</span> <strong>[${step.lane}]</strong> ${step.title}`;
+          
+          // Limit logs to last 15 entries
+          if (dom.timelineLog.children.length > 15) {
+            dom.timelineLog.removeChild(dom.timelineLog.firstElementChild);
+          }
+          dom.timelineLog.appendChild(logEntry);
+          dom.timelineLog.scrollTop = dom.timelineLog.scrollHeight;
+        }
+
+        // 6. Update Connection lines animation
+        updateSvgConnections();
+      }
+
+      // --- PHASE FILTERING ---
+      function setPhase(phase) {
+        activePhase = phase;
+        dom.phaseTabs.forEach(tab => {
+          if (tab.getAttribute('data-phase') === phase) {
+            tab.classList.add('active');
+          } else {
+            tab.classList.remove('active');
+          }
+        });
+
+        dom.nodeCards.forEach(card => {
+          const nodePhase = card.getAttribute('data-phase');
+          if (phase === 'all' || nodePhase === phase) {
+            card.classList.remove('dimmed');
+          } else {
+            card.classList.add('dimmed');
+          }
+        });
+
+        // If current step is not in phase, jump to first step in phase
+        if (phase !== 'all') {
+          const firstInPhase = STEPS.findIndex(s => s.phase === phase);
+          if (firstInPhase !== -1 && STEPS[currentStepIndex].phase !== phase) {
+            renderStep(firstInPhase);
+          }
+        }
+      }
+
+      // --- PLAYBACK CONTROLS ---
+      function play() {
+        if (isPlaying) return;
+        isPlaying = true;
+        dom.playIcon.textContent = '⏸';
+        dom.playText.textContent = 'Tạm Dừng';
+        dom.btnPlay.classList.add('btn-primary');
+
+        const stepInterval = Math.max(800, 2400 / speedMultiplier);
+        playTimer = setInterval(() => {
+          let nextIndex = currentStepIndex + 1;
+          if (nextIndex >= STEPS.length) {
+            nextIndex = 0; // loop back
+          }
+          renderStep(nextIndex);
+        }, stepInterval);
+      }
+
+      function pause() {
+        if (!isPlaying) return;
+        isPlaying = false;
+        clearInterval(playTimer);
+        playTimer = null;
+        dom.playIcon.textContent = '▶';
+        dom.playText.textContent = 'Chạy Mô Phỏng';
+      }
+
+      function togglePlay() {
+        if (isPlaying) pause();
+        else play();
+      }
+
+      function nextStep() {
+        pause();
+        let nextIndex = currentStepIndex + 1;
+        if (nextIndex >= STEPS.length) nextIndex = 0;
+        renderStep(nextIndex);
+      }
+
+      function prevStep() {
+        pause();
+        let prevIndex = currentStepIndex - 1;
+        if (prevIndex < 0) prevIndex = STEPS.length - 1;
+        renderStep(prevIndex);
+      }
+
+      function reset() {
+        pause();
+        renderStep(0);
+      }
+
+      function cycleSpeed() {
+        const speeds = [1.0, 1.5, 2.0];
+        let idx = speeds.indexOf(speedMultiplier);
+        speedMultiplier = speeds[(idx + 1) % speeds.length];
+        dom.btnSpeed.textContent = `${speedMultiplier.toFixed(1)}x`;
+        if (isPlaying) {
+          pause();
+          play();
+        }
+      }
+
+      function toggleTheme() {
+        const current = document.documentElement.getAttribute('data-theme') || 'dark';
+        const next = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        dom.btnTheme.textContent = next === 'dark' ? '🌙' : '☀️';
+        setTimeout(updateSvgConnections, 50);
+      }
+
+      function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      }
+
+      function copyCode() {
+        const codeText = dom.inspectorCode.textContent;
+        navigator.clipboard.writeText(codeText).then(() => {
+          dom.btnCopyCode.textContent = '✓ Đã chép!';
+          setTimeout(() => { dom.btnCopyCode.textContent = '📋 Sao chép'; }, 1600);
+        }).catch(() => {
+          dom.btnCopyCode.textContent = 'Lỗi copy';
+        });
+      }
+
+      // --- EVENT LISTENERS ---
+      dom.btnPlay.addEventListener('click', togglePlay);
+      dom.btnNext.addEventListener('click', nextStep);
+      dom.btnPrev.addEventListener('click', prevStep);
+      dom.btnReset.addEventListener('click', reset);
+      dom.btnSpeed.addEventListener('click', cycleSpeed);
+      dom.btnTheme.addEventListener('click', toggleTheme);
+      dom.btnFullscreen.addEventListener('click', toggleFullscreen);
+      dom.btnCopyCode.addEventListener('click', copyCode);
+
+      // Node Card Clicks
+      dom.nodeCards.forEach(card => {
+        card.addEventListener('click', () => {
+          pause();
+          const stepId = parseInt(card.getAttribute('data-step'), 10);
+          renderStep(stepId - 1);
+        });
+      });
+
+      // Phase Tab Clicks
+      dom.phaseTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          setPhase(tab.getAttribute('data-phase'));
+        });
+      });
+
+      // Keyboard Shortcuts
+      window.addEventListener('keydown', (e) => {
+        if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+        
+        if (e.key === ' ' || e.code === 'Space') {
+          e.preventDefault();
+          togglePlay();
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          nextStep();
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          prevStep();
+        } else if (e.key === 'r' || e.key === 'R') {
+          e.preventDefault();
+          reset();
+        } else if (e.key === 't' || e.key === 'T') {
+          e.preventDefault();
+          toggleTheme();
+        } else if (['1', '2', '3'].includes(e.key)) {
+          setPhase(`phase${e.key}`);
+        } else if (e.key === '0') {
+          setPhase('all');
+        }
+      });
+
+      // Window Resize Listener for SVG re-calculation
+      window.addEventListener('resize', updateSvgConnections);
+
+      // --- INITIALIZATION ---
+      renderStep(0, true);
+      setTimeout(updateSvgConnections, 100);
+
+    })();
+  </script>
+</body>
+</html>

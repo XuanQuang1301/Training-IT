@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "PP Hub - OnlyOffice Real-time Editing Sequence",
+    "viewBox": [1080, 680],
+    "column_fit": "spread",
+    "animation": "trace",
+    "quality_profile": "showcase",
+    "views": [
+      { "id": "init-editor", "label": "Khởi tạo phiên soạn thảo", "focus": ["user", "web", "api", "oo"], "note": "Người dùng mở file và lấy OnlyOffice editor config." },
+      { "id": "fetch-and-render", "label": "Kéo file và Render", "focus": ["oo", "api", "minio", "user"], "note": "OnlyOffice Server lấy file blob từ MinIO thông qua API và render." },
+      { "id": "save-and-callback", "label": "Lưu file và Callback", "focus": ["user", "oo", "api", "minio", "db"], "note": "Khi lưu hoặc đóng tab, OnlyOffice gửi Webhook về API để lưu version mới." }
+    ]
+  },
+  "participants": [
+    { "id": "user", "type": "external", "label": "User Browser", "sublabel": "React UI Client" },
+    { "id": "web", "type": "frontend", "label": "PP Hub Web UI", "sublabel": "Frontend App" },
+    { "id": "api", "type": "backend", "label": "PP Hub Core API", "sublabel": "REST & Webhook" },
+    { "id": "oo", "type": "backend", "label": "OnlyOffice Server", "sublabel": "WS Document Engine" },
+    { "id": "db", "type": "database", "label": "PostgreSQL 16", "sublabel": "ACL & Version Metadata" },
+    { "id": "minio", "type": "database", "label": "MinIO Storage", "sublabel": "File Blob Storage" }
+  ],
+  "segments": [
+    { "from": 150, "to": 300, "label": "1. Initialization" },
+    { "from": 310, "to": 435, "label": "2. Data Stream & Edit" },
+    { "from": 445, "to": 585, "label": "3. Save & Versioning" }
+  ],
+  "messages": [
+    { "id": "open-file", "from": "user", "to": "web", "y": 165, "label": "Click mở file docx", "variant": "default" },
+    { "id": "get-config", "from": "web", "to": "api", "y": 195, "label": "GET /editors/onlyoffice/config", "variant": "emphasis" },
+    { "id": "check-perm", "from": "api", "to": "db", "y": 225, "label": "Kiểm tra quyền EDITOR", "variant": "security" },
+    { "id": "return-config", "from": "api", "to": "web", "y": 255, "label": "Config JSON + Token", "variant": "return" },
+    { "id": "init-frame", "from": "web", "to": "oo", "y": 285, "label": "Init Frame(Config)", "variant": "default" },
+    { "id": "fetch-blob-api", "from": "oo", "to": "api", "y": 320, "label": "GET /files/{id}/download-internal", "variant": "emphasis" },
+    { "id": "fetch-blob-minio", "from": "api", "to": "minio", "y": 350, "label": "Read Original Blob", "variant": "default" },
+    { "id": "stream-blob", "from": "minio", "to": "oo", "y": 380, "label": "Stream Data", "variant": "return" },
+    { "id": "render-editor", "from": "oo", "to": "user", "y": 410, "label": "Render Soạn thảo Trực tuyến", "variant": "return" },
+    { "id": "save-trigger", "from": "user", "to": "oo", "y": 455, "label": "Bấm Ctrl+S / Đóng Tab", "variant": "default" },
+    { "id": "callback-webhook", "from": "oo", "to": "api", "y": 485, "label": "POST /editors/onlyoffice/callback", "variant": "emphasis" },
+    { "id": "write-minio", "from": "api", "to": "minio", "y": 515, "label": "Save New Blob & Version", "variant": "dashed" },
+    { "id": "update-metadata", "from": "api", "to": "db", "y": 545, "label": "Update Node Version + 1", "variant": "dashed" }
+  ],
+  "activations": [
+    { "participant": "web", "from": 165, "to": 285, "type": "frontend" },
+    { "participant": "api", "from": 195, "to": 550, "type": "backend" },
+    { "participant": "db", "from": 225, "to": 545, "type": "database" },
+    { "participant": "oo", "from": 285, "to": 490, "type": "backend" },
+    { "participant": "minio", "from": 350, "to": 520, "type": "database" }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Initialization Phase",
+      "items": [
+        "Web UI gọi Core API kiểm tra quyền phân cấp ACL (Role EDITOR)",
+        "API trả về cấu hình JWT và URL Callback để OnlyOffice nhúng iframe"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Real-time Collaboration Phase",
+      "items": [
+        "OnlyOffice Server tự động tải tệp tin Blob từ MinIO qua Core API",
+        "Nhiều người dùng cùng truy cập được đồng bộ thời gian thực qua kết nối WebSocket"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Save & Versioning Phase",
+      "items": [
+        "Khi kết thúc phiên chỉnh sửa, OnlyOffice kích hoạt Webhook Callback",
+        "Core API tự động lưu bản ghi phiên bản mới vào MinIO và cập nhật PostgreSQL metadata"
+      ]
+    }
+  ]
+}

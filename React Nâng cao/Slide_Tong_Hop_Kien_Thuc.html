@@ -1,0 +1,1825 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slide Tổng Hợp Kiến Thức: JavaScript - TypeScript - React</title>
+  <style>
+    :root {
+      --bg-main: #ffffff;
+      --bg-card: #f8fafc;
+      --bg-card-border: #e2e8f0;
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --accent: #2563eb;
+      --accent-light: #eff6ff;
+      --accent-border: #bfdbfe;
+      --tag-bg: #e0e7ff;
+      --tag-text: #3730a3;
+      --success: #16a34a;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.06);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background-color: #ffffff;
+      color: var(--text-primary);
+      overflow: hidden;
+    }
+
+    /* Deck Viewport Container - Edge to Edge White Layout */
+    .deck-container {
+      width: 100vw;
+      height: 100vh;
+      background: var(--bg-main);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Progress Bar */
+    .progress-bar-container {
+      width: 100%;
+      height: 4px;
+      background: #e2e8f0;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 100;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* Header Controls */
+    .deck-header {
+      padding: 14px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #f1f5f9;
+      background: var(--bg-main);
+      z-index: 10;
+      height: 54px;
+    }
+
+    .deck-title-badge {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      background: var(--accent-light);
+      padding: 5px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--accent-border);
+      letter-spacing: 0.5px;
+    }
+
+    .slide-counter {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    /* Slides Wrapper */
+    .slides-wrapper {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Individual Slide - Optimized to Fit Single Screen Without Scrolling */
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      padding: 32px 52px 20px 52px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(30px);
+      transition: all 0.3s ease-out;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(0);
+    }
+
+    /* Typography */
+    .slide-section-tag {
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+
+    .slide-title {
+      font-size: 30px;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 20px;
+      line-height: 1.25;
+      border-bottom: 2px solid #f1f5f9;
+      padding-bottom: 10px;
+    }
+
+    /* Content Grids & Layouts */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      flex: 1;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 24px;
+      flex: 1;
+    }
+
+    .grid-url-slide {
+      display: grid;
+      grid-template-columns: 1.35fr 0.95fr;
+      gap: 20px;
+      flex: 1;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      border-radius: 10px;
+      padding: 22px 26px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+
+    ul.clean-list {
+      list-style: none;
+    }
+
+    ul.clean-list li {
+      position: relative;
+      padding-left: 20px;
+      margin-bottom: 10px;
+      font-size: 15px;
+      line-height: 1.55;
+      color: var(--text-secondary);
+    }
+
+    ul.clean-list li::before {
+      content: "•";
+      color: var(--accent);
+      font-weight: bold;
+      font-size: 18px;
+      position: absolute;
+      left: 0;
+      top: -2px;
+    }
+
+    .highlight {
+      background: #fef08a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+      color: #854d0e;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+    .badge-green { background: #dcfce7; color: #166534; }
+    .badge-amber { background: #fef3c7; color: #92400e; }
+    .badge-red { background: #fee2e2; color: #991b1b; }
+
+    /* Tables */
+    table.slide-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      margin-top: 6px;
+      background: var(--bg-main);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    table.slide-table th {
+      background: #f1f5f9;
+      color: var(--text-primary);
+      font-weight: 700;
+      text-align: left;
+      padding: 12px 18px;
+      font-size: 15.5px;
+      border-bottom: 2px solid var(--bg-card-border);
+    }
+
+    table.slide-table td {
+      padding: 11px 18px;
+      border-bottom: 1px solid #f1f5f9;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      font-size: 14.5px;
+    }
+
+    table.slide-table tr:nth-child(even) td {
+      background: #fafcff;
+    }
+
+    table.slide-table tr:hover td {
+      background: #f1f5f9;
+    }
+
+    /* Table Compact Variation with Spacious Legibility */
+    table.table-compact th {
+      padding: 11px 18px;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    table.table-compact td {
+      padding: 10.5px 18px;
+      font-size: 14.5px;
+      line-height: 1.5;
+    }
+
+    /* URL Components Table - Balanced Padding & Row Height */
+    table.url-parts-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+      background: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      flex: 1;
+    }
+
+    table.url-parts-table th {
+      background: #e2e8f0;
+      color: var(--text-primary);
+      font-weight: 700;
+      padding: 9px 12px;
+      text-align: left;
+    }
+
+    table.url-parts-table td {
+      padding: 7.5px 12px;
+      border-bottom: 1px solid #edf2f7;
+      vertical-align: middle;
+      line-height: 1.4;
+    }
+
+    table.url-parts-table code {
+      background: #f1f5f9;
+      color: #2563eb;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-family: monospace;
+    }
+
+    /* Code Snippet Box */
+    pre.code-box {
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 16px;
+      border-radius: 8px;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 14px;
+      line-height: 1.5;
+      overflow-x: auto;
+      margin-top: 8px;
+    }
+
+    /* Flow Diagrams */
+    .flow-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--accent-light);
+      border: 1px solid var(--accent-border);
+      border-radius: 10px;
+      padding: 18px 24px;
+      margin-top: 10px;
+    }
+
+    .flow-step {
+      text-align: center;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1.35;
+    }
+
+    .flow-arrow {
+      font-weight: 900;
+      color: var(--accent);
+      font-size: 20px;
+    }
+
+    /* Footer Controls */
+    .deck-footer {
+      padding: 12px 48px;
+      border-top: 1px solid #f1f5f9;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-main);
+      height: 54px;
+    }
+
+    .nav-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      color: var(--text-primary);
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .nav-btn:hover {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      background: var(--bg-card) !important;
+      color: var(--text-muted) !important;
+      border-color: var(--bg-card-border) !important;
+    }
+
+    /* Title Slide Customization */
+    .title-slide-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      background: #ffffff;
+      border: 1px solid var(--bg-card-border);
+      border-radius: 14px;
+      padding: 40px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .main-title {
+      font-size: 40px;
+      font-weight: 900;
+      color: var(--text-primary);
+      line-height: 1.25;
+      margin-bottom: 16px;
+    }
+
+    .main-subtitle {
+      font-size: 18px;
+      color: var(--text-secondary);
+      max-width: 800px;
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+
+    /* Section Intro / Divider Slide Styling */
+    .section-intro-card {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+      border: 2px solid var(--accent-border);
+      border-radius: 14px;
+      padding: 36px 48px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .section-intro-num {
+      font-size: 14px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .section-intro-title {
+      font-size: 30px;
+      font-weight: 900;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+      line-height: 1.25;
+    }
+
+    .section-intro-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .section-intro-item {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-left: 4px solid var(--accent);
+      border-radius: 6px;
+      padding: 14px 22px;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+
+    /* Agenda Grid */
+    .agenda-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      flex: 1;
+    }
+
+    .agenda-card {
+      background: var(--bg-main);
+      border: 2px solid var(--accent-border);
+      border-radius: 12px;
+      padding: 26px 22px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .agenda-num {
+      font-size: 34px;
+      font-weight: 900;
+      color: var(--accent);
+      margin-bottom: 6px;
+      line-height: 1;
+    }
+
+    .agenda-card-title {
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 18px;
+      color: var(--text-primary);
+      line-height: 1.3;
+    }
+
+    .agenda-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-bottom: 16px;
+    }
+
+    .agenda-list li {
+      position: relative;
+      padding-left: 20px;
+      font-size: 15.5px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+    }
+
+    .agenda-list li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: var(--bullet-color, var(--accent));
+      font-size: 22px;
+      line-height: 1;
+      top: 1px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="deck-container">
+    <!-- Top Progress Bar -->
+    <div class="progress-bar-container">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <!-- Top Header -->
+    <div class="deck-header">
+      <div class="deck-title-badge">REACT & TYPESCRIPT CORE FOUNDATION</div>
+      <div class="slide-counter" id="slideCounter">Slide 1 / 24</div>
+    </div>
+
+    <!-- Slides Wrapper -->
+    <div class="slides-wrapper">
+
+      <!-- SLIDE 1: Title Slide -->
+      <div class="slide active">
+        <div class="title-slide-content">
+          <div class="slide-section-tag">TÀI LIỆU TRÌNH BÀY NỀN TẢNG</div>
+          <h1 class="main-title">JavaScript, TypeScript & React Cơ Bản</h1>
+          <p class="main-subtitle">
+            Hệ thống hóa toàn bộ kiến thức cốt lõi: Từ cơ chế Mạng, trình duyệt Web, TypeScript static typing đến React Engine và 8 Hooks cốt lõi.
+          </p>
+          <div style="display: flex; gap: 14px;">
+            <span class="badge badge-blue">JS Fundamentals</span>
+            <span class="badge badge-green">TypeScript Core</span>
+            <span class="badge badge-amber">React Engine</span>
+            <span class="badge badge-blue" style="background: #ede9fe; color: #6d28d9;">React Hooks</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 2: Agenda (Mục lục tổng quan) -->
+      <div class="slide">
+        <div class="slide-section-tag">MỤC LỤC TRÌNH BÀY TỔNG QUAN</div>
+        <h2 class="slide-title">4 Phần Nội Dung Chính Sẽ Trình Bày</h2>
+        
+        <div class="agenda-grid">
+          <!-- Card 01 -->
+          <div class="agenda-card" style="border-top: 4px solid var(--accent);">
+            <div class="agenda-num">01</div>
+            <div class="agenda-card-title">Nền Tảng Mạng &amp; JS</div>
+            <ul class="agenda-list">
+              <li>Cấu trúc URL 9 thành phần &amp; phân loại</li>
+              <li>Luồng truy vấn DNS &amp; cơ chế CORS</li>
+              <li>Web Render Pipeline (Reflow/Repaint)</li>
+              <li>Biến, Scope, Event Loop &amp; ES Modules</li>
+            </ul>
+            <div style="margin-top: auto; padding: 10px 14px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; font-size: 13.5px; color: #1e40af; font-weight: 600;">
+              5 Chuyên đề cốt lõi Mạng &amp; JS
+            </div>
+          </div>
+
+          <!-- Card 02 -->
+          <div class="agenda-card" style="border-top: 4px solid #10b981; border-color: #a7f3d0;">
+            <div class="agenda-num" style="color: #059669;">02</div>
+            <div class="agenda-card-title">TypeScript Cơ Bản</div>
+            <ul class="agenda-list" style="--bullet-color: #059669;">
+              <li>Lý do cần TypeScript trong dự án</li>
+              <li>Kiểu dữ liệu mảng, object &amp; hàm</li>
+              <li>Bộ tứ <code>void</code>, <code>never</code>, <code>any</code>, <code>unknown</code></li>
+              <li>Interface vs Type cho React Props</li>
+            </ul>
+            <div style="margin-top: auto; padding: 10px 14px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; font-size: 13.5px; color: #065f46; font-weight: 600;">
+              5 Chuyên đề Type Safety
+            </div>
+          </div>
+
+          <!-- Card 03 -->
+          <div class="agenda-card" style="border-top: 4px solid #f59e0b; border-color: #fde68a;">
+            <div class="agenda-num" style="color: #d97706;">03</div>
+            <div class="agenda-card-title">Kiến Thức React Cơ Bản</div>
+            <ul class="agenda-list" style="--bullet-color: #d97706;">
+              <li>So sánh chi tiết SSR vs CSR</li>
+              <li>Kiến trúc Web: SPA vs MPA</li>
+              <li>Tooling hiện đại: Vite &amp; pnpm</li>
+              <li>Class vs Function Component</li>
+            </ul>
+            <div style="margin-top: auto; padding: 10px 14px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; font-size: 13.5px; color: #92400e; font-weight: 600;">
+              4 Chuyên đề kiến trúc React
+            </div>
+          </div>
+
+          <!-- Card 04 -->
+          <div class="agenda-card" style="border-top: 4px solid #8b5cf6; border-color: #c4b5fd;">
+            <div class="agenda-num" style="color: #7c3aed;">04</div>
+            <div class="agenda-card-title">React Hooks Sâu Rộng</div>
+            <ul class="agenda-list" style="--bullet-color: #7c3aed;">
+              <li>Bản chất 8 Hooks &amp; Fiber Linked List</li>
+              <li>Bộ tứ nền tảng: State &amp; Effect</li>
+              <li>Cơ chế <code>useState</code> &amp; <code>useReducer</code></li>
+              <li><code>useEffect</code> &amp; <code>useLayoutEffect</code> (Async vs Sync)</li>
+            </ul>
+            <div style="margin-top: auto; padding: 10px 14px; background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 8px; font-size: 13.5px; color: #5b21b6; font-weight: 600;">
+              5 Chuyên đề Hooks chuyên sâu
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 3: Section 1 Intro / Agenda Divider Slide (Nội dung Phần 1) -->
+      <div class="slide">
+        <div class="section-intro-card">
+          <div class="section-intro-num">NỘI DUNG CHI TIẾT PHẦN 1</div>
+          <h2 class="section-intro-title">PHẦN 1: Nền Tảng Mạng & JavaScript Cho React</h2>
+          <p style="font-size: 15px; color: var(--text-secondary); margin-bottom: 16px;">
+            Trình bày các chủ đề cơ bản về cơ chế mạng, trình duyệt Web và kiến thức JavaScript nền tảng trước khi học React:
+          </p>
+          
+          <div class="section-intro-list">
+            <div class="section-intro-item">1.1 Cấu Trúc URL & Phân Loại Đường Dẫn</div>
+            <div class="section-intro-item">1.2 Origin, Cơ Chế CORS & Luồng DNS</div>
+            <div class="section-intro-item">1.3 Webpage Rendering Pipeline (Reflow/Repaint)</div>
+            <div class="section-intro-item">1.4 Biến, Scope & Phương Thức Mảng JS</div>
+            <div class="section-intro-item">1.5 Event Loop (Đơn luồng JS) & Cú Pháp JS Modern</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 4: Full URL Breakdown Slide - Perfect Balanced Height -->
+      <div class="slide">
+        <div class="slide-section-tag">PHẦN 1: MẠNG & JAVASCRIPT</div>
+        <h2 class="slide-title">1.1 Cấu Trúc URL & Phân Loại Đường Dẫn</h2>
+
+        <div class="card" style="margin-bottom: 12px; background: #f0f9ff; border-color: #bae6fd; padding: 10px 18px;">
+          <div style="font-family: monospace; font-size: 14px; font-weight: 700; color: #0369a1; word-break: break-all;">
+            https://api.sydexa.vn:80/users/search?name=Minh&role=admin#results
+          </div>
+        </div>
+
+        <div class="grid-url-slide">
+          <div class="card" style="padding: 18px 22px;">
+            <div class="card-title" style="margin-bottom: 10px; font-size: 17px;">Đầy đủ 9 thành phần chính của URL</div>
+            
+            <table class="url-parts-table">
+              <thead>
+                <tr>
+                  <th style="width: 22%;">Thành phần</th>
+                  <th style="width: 25%;">Giá trị mẫu</th>
+                  <th>Mô tả chi tiết</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><b>Scheme / Protocol</b></td>
+                  <td><code>https://</code></td>
+                  <td>Nằm trước <code>://</code>, giao thức kết nối. HTTPS có mã hóa bảo mật.</td>
+                </tr>
+                <tr>
+                  <td><b>Subdomain</b></td>
+                  <td><code>api</code></td>
+                  <td>Đứng trước domain chính, dùng phân chia vùng app (API, blog, admin).</td>
+                </tr>
+                <tr>
+                  <td><b>Domain</b></td>
+                  <td><code>sydexa</code></td>
+                  <td>Tên định danh chính của website/tổ chức (giống địa chỉ tòa nhà).</td>
+                </tr>
+                <tr>
+                  <td><b>TLD</b></td>
+                  <td><code>.vn</code></td>
+                  <td>Tên miền cấp cao nhất, cho biết loại hình/quốc gia (.com, .org, .edu).</td>
+                </tr>
+                <tr>
+                  <td><b>Port</b></td>
+                  <td><code>:80</code></td>
+                  <td>Cổng kết nối server. Thường ẩn ngầm định (HTTP: 80, HTTPS: 443).</td>
+                </tr>
+                <tr>
+                  <td><b>Path</b></td>
+                  <td><code>/users/search</code></td>
+                  <td>Sau host, trước dấu <code>?</code>. Đường dẫn tới tài nguyên cụ thể.</td>
+                </tr>
+                <tr>
+                  <td><b>Query Separator</b></td>
+                  <td><code>?</code></td>
+                  <td>Cầu nối báo path đã kết thúc, bắt đầu tham số truy vấn.</td>
+                </tr>
+                <tr>
+                  <td><b>Query Params</b></td>
+                  <td><code>name=Minh&amp;role=admin</code></td>
+                  <td>Dữ liệu lọc <code>key=value</code> gửi server, nối bằng dấu <code>&amp;</code>.</td>
+                </tr>
+                <tr>
+                  <td><b>Fragment</b></td>
+                  <td><code>#results</code></td>
+                  <td>Neo trang do <b>Browser</b> xử lý để cuộn màn hình. <b>KHÔNG</b> gửi server.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 14px;">
+            <div class="card" style="padding: 16px 20px; flex: 1;">
+              <div class="card-title" style="margin-bottom: 8px; font-size: 17px;">Absolute vs Relative URL</div>
+              <table class="slide-table" style="margin-top: 0; font-size: 13.5px;">
+                <tr>
+                  <th>Dạng URL</th>
+                  <th>Ví dụ</th>
+                  <th>Mục đích</th>
+                </tr>
+                <tr>
+                  <td><b>Absolute</b></td>
+                  <td><code>http://api.sydexa.com</code></td>
+                  <td>Gọi API ngoài Origin</td>
+                </tr>
+                <tr>
+                  <td><b>Root-relative</b></td>
+                  <td><code>/users/search</code></td>
+                  <td>Nội bộ cùng Origin</td>
+                </tr>
+                <tr>
+                  <td><b>Path-relative</b></td>
+                  <td><code>./detail</code> hoặc <code>../</code></td>
+                  <td>Tương đối từ thư mục hiện tại</td>
+                </tr>
+              </table>
+            </div>
+
+            <div class="card" style="padding: 16px 20px; background: #fffbe6; border-color: #ffe58f;">
+              <div class="card-title" style="margin-bottom: 6px; color: #873800; font-size: 16px;">URL Encoding / Decoding</div>
+              <p style="font-size: 13.5px; color: #595959; line-height: 1.5;">
+                Mã hóa ký tự đặc biệt khi truyền qua đường dẫn URL (Ví dụ: khoảng trắng → <code>%20</code>, dấu &amp; → <code>%26</code>).
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 5: Origin, CORS & DNS -->
+      <div class="slide">
+        <div class="slide-section-tag">PHẦN 1: MẠNG & JAVASCRIPT</div>
+        <h2 class="slide-title">1.2 Origin, Cơ Chế CORS & Luồng DNS</h2>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Origin & Cơ Chế Bảo Mật CORS</div>
+            <ul class="clean-list">
+              <li><b>Origin</b> = <code>Protocol</code> + <code>Host</code> + <code>Port</code>.</li>
+              <li>Nếu 1 trong 3 yếu tố khác nhau → <b>Cross-Origin Request</b>.</li>
+              <li><b>CORS</b>: Cơ chế bảo mật do <b>Browser</b> kiểm tra response header (<code>Access-Control-Allow-Origin</code>) từ Server.</li>
+              <li>Same-origin request cho phép mặc định; Cross-origin request cần server cấp phép.</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <div class="card-title">3 Bước Tra Cứu DNS (DNS Resolution)</div>
+            <ul class="clean-list">
+              <li><b>Bước 1</b>: Trình duyệt kiểm tra <b>Browser DNS Cache</b>.</li>
+              <li><b>Bước 2</b>: Trình duyệt kiểm tra <b>OS DNS Cache</b>.</li>
+              <li><b>Bước 3</b>: Hỏi <b>Recursive Resolver</b> (ISP / 1.1.1.1 / 8.8.8.8) đi lần lượt qua các server:
+                <br><i style="display: inline-block; margin-top: 6px; color: var(--accent); font-weight: 700;">Root Name Server → TLD Server (.com/.vn) → Authoritative Server (Trả về IP thực sự)</i>
+              </li>
+            </ul>
+
+            <div style="margin-top: 14px; display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; line-height: 1.45;">
+              <div style="background: #f8fafc; border-left: 3px solid var(--accent); padding: 7px 11px; border-radius: 6px;">
+                <b>1. Root Server (Gốc):</b> Có 13 cụm toàn cầu (<code>a</code> đến <code>m.root-servers.net</code>). Không chứa IP cụ thể, chỉ điều hướng resolver sang <b>TLD Server</b> quản lý phần đuôi (ví dụ <code>.com</code>).
+              </div>
+              <div style="background: #f8fafc; border-left: 3px solid #0284c7; padding: 7px 11px; border-radius: 6px;">
+                <b>2. TLD Server (Cấp cao nhất):</b> Quản lý đuôi miền (<code>.com</code>, <code>.vn</code>...). Nắm danh sách và chỉ đường tiếp đến <b>Authoritative Server</b> có thẩm quyền của tên miền con.
+              </div>
+              <div style="background: #f8fafc; border-left: 3px solid #059669; padding: 7px 11px; border-radius: 6px;">
+                <b>3. Authoritative Server (Thẩm quyền):</b> Nắm bản ghi DNS gốc (Cloudflare, AWS Route 53...). Tra bảng và <b>trả về IP thực sự</b> (bản ghi Type A / AAAA) cho Resolver.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 6: Rendering Pipeline -->
+      <div class="slide">
+        <div class="slide-section-tag">PHẦN 1: MẠNG & JAVASCRIPT</div>
+        <h2 class="slide-title">1.3 Webpage Rendering Pipeline (Code → Pixel)</h2>
+
+        <div class="flow-container">
+          <div class="flow-step">HTML → DOM Tree<br>CSS → CSSOM</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">Render Tree<br><small>(DOM + CSSOM)</small></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">Layout (Reflow)<br><small>(Tính vị trí x, y, kích thước)</small></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">Paint (Repaint)<br><small>(Điền pixel màu sắc)</small></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">Composite<br><small>(Hiển thị lên Screen)</small></div>
+        </div>
+
+        <div class="grid-2" style="margin-top: 20px;">
+          <div class="card">
+            <div class="card-title">Reflow (Thay đổi Layout)</div>
+            <p style="font-size: 15px; color: var(--text-secondary); line-height: 1.6;">
+              Xảy ra khi thay đổi kích thước, thêm/bớt element. Tốn rất nhiều tài nguyên CPU/GPU của trình duyệt vì phải tính toán lại vị trí toàn bộ cây giao diện.
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Repaint (Vẽ lại màu sắc)</div>
+            <p style="font-size: 15px; color: var(--text-secondary); line-height: 1.6;">
+              Xảy ra khi thay đổi màu sắc, background, visibility mà không đổi kích thước hay cấu trúc khung hình.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 7: Variables & Arrays -->
+      <div class="slide">
+        <div class="slide-section-tag">PHẦN 1: MẠNG & JAVASCRIPT</div>
+        <h2 class="slide-title">1.4 Biến, Scope & Phương Thức Mảng JS</h2>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Biến & Immutability trong React</div>
+            <ul class="clean-list">
+              <li><code>var</code>: Function scope, hoisting (Tránh sử dụng trong React).</li>
+              <li><code>let</code>: Block scope `{}` cho phép gán lại giá trị (reassign).</li>
+              <li><code>const</code>: Block scope `{}` không cho gán lại reference.</li>
+              <li><span class="highlight">Chú ý React:</span> Trong State, không mutate trực tiếp object/array mà luôn tạo <b>Reference mới</b> (Immutability).</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Bộ Ba Phương Thức Mảng Cốt Lõi</div>
+            <ul class="clean-list">
+              <li><code>map()</code>: Biến đổi từng phần tử thành mảng mới cùng độ dài (Dùng render list JSX).</li>
+              <li><code>filter()</code>: Lọc ra các phần tử thỏa mãn điều kiện.</li>
+              <li><code>reduce()</code>: Gom mảng về 1 giá trị duy nhất (số, object, mảng mới).</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 8: Event Loop & Modern Syntax -->
+      <div class="slide">
+        <div class="slide-section-tag">PHẦN 1: MẠNG & JAVASCRIPT</div>
+        <h2 class="slide-title">1.5 Event Loop & Cú Pháp JS Modern</h2>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Event Loop (Đơn Luồng JS)</div>
+            <ul class="clean-list">
+              <li><b>Call Stack</b>: Thực thi các đoạn mã đồng bộ.</li>
+              <li><b>Microtask Queue</b>: Ưu tiên cao (Promise, `async/await`).</li>
+              <li><b>Macrotask Queue</b>: Ưu tiên thấp (`setTimeout`, `setInterval`).</li>
+              <li><i>Thứ tự:</i> Call Stack trống → Chạy hết sạch Microtasks → Chạy 1 Macrotask.</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Cú Pháp Modern JS Cần Thiết</div>
+            <ul class="clean-list">
+              <li><code>?.</code> (Optional Chaining): Tránh fatal crash khi truy cập thuộc tính `null`/`undefined`.</li>
+              <li><code>??</code> (Nullish Coalescing): Giữ lại `0`, `""`, `false` (chỉ lấy vế sau khi vế trước `null`/`undefined`).</li>
+              <li><code>finally</code> trong `try-catch`: <b>Luôn luôn chạy</b> để tắt trạng thái loading.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 9: Section 2 Intro / Agenda Divider Slide (Nội dung Phần 2) -->
+      <div class="slide">
+        <div class="section-intro-card">
+          <div class="section-intro-num">NỘI DUNG CHI TIẾT PHẦN 2</div>
+          <h2 class="section-intro-title">PHẦN 2: TypeScript Cơ Bản Cho React</h2>
+          <p style="font-size: 15px; color: var(--text-secondary); margin-bottom: 16px;">
+            Tìm hiểu lý do sử dụng TypeScript, các kiểu dữ liệu cốt lõi, bộ tứ đặc biệt và cách định nghĩa Interface/Type cho React Props:
+          </p>
+          
+          <div class="section-intro-list">
+            <div class="section-intro-item">2.1 Tại Sao Cần TS & Kiểu Dữ Liệu Cơ Bản</div>
+            <div class="section-intro-item">2.2 Bộ Tứ Đặc Biệt (void, never, any, unknown) & Interface/Type</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 10: TypeScript Intro -->
+      <div class="slide">
+        <div class="slide-section-tag">PHẦN 2: TYPESCRIPT CƠ BẢN</div>
+        <h2 class="slide-title">2.1 Tại Sao Cần TS & Kiểu Dữ Liệu Cơ Bản</h2>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Lý Do Dùng TypeScript</div>
+            <ul class="clean-list">
+              <li><b>JavaScript</b>: Dynamically Typed → Phát hiện lỗi muộn ở <b>Runtime</b> (trên máy của người dùng).</li>
+              <li><b>TypeScript</b>: Statically Typed → Phát hiện lỗi ngay lúc code ở <b>Compile Time</b> trong IDE.</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Cú Pháp Type Cơ Bản</div>
+            <pre class="code-box">
+// Kiểu nguyên thủy
+let name: string = "Sydexa";
+let age: number = 25;
+
+// Mảng & Tuple
+let scores: number[] = [1, 2, 3];
+let user: [number, string] = [1, "Admin"];
+            </pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 11: TS Special Quartet & Interface -->
+      <div class="slide">
+        <div class="slide-section-tag">PHẦN 2: TYPESCRIPT CƠ BẢN</div>
+        <h2 class="slide-title">2.2 Bộ Tứ Đặc Biệt & Interface/Type</h2>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Bộ Tứ: void, never, any, unknown</div>
+            <ul class="clean-list">
+              <li><code>void</code>: Hàm không trả về giá trị (return undefined).</li>
+              <li><code>never</code>: Giá trị KHÔNG BAO GIỜ xảy ra (throw error / loop vô tận).</li>
+              <li><code>any</code>: Tắt kiểm tra kiểu (Nguy hiểm, nên tránh).</li>
+              <li><code>unknown</code>: An toàn hơn `any`, bắt buộc <b>Type Narrowing</b> trước khi dùng.</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Interface vs Type cho Props</div>
+            <pre class="code-box">
+// Interface dùng cho React Props
+interface ButtonProps {
+  label: string;
+  onClick: () => void;
+  disabled?: boolean;
+}
+
+// Type dùng cho Union Types
+type Status = "idle" | "loading" | "success";
+            </pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 12: Section 3 Intro / Agenda Divider Slide (Nội dung Phần 3) -->
+      <div class="slide">
+        <div class="section-intro-card">
+          <div class="section-intro-num">NỘI DUNG CHI TIẾT PHẦN 3</div>
+          <h2 class="section-intro-title">PHẦN 3: Kiến Thức React Cơ Bản & Bối Cảnh Web</h2>
+          <p style="font-size: 15px; color: var(--text-secondary); margin-bottom: 16px;">
+            Mổ xẻ engine bên trong React, so sánh SSR vs CSR, SPA vs MPA, công cụ hiện đại (Vite, pnpm) và hành trình tiến hóa Component:
+          </p>
+          
+          <div class="section-intro-list">
+            <div class="section-intro-item">3.1 SSR vs CSR (Nơi Render Quyết Định Tất Cả)</div>
+            <div class="section-intro-item">3.2 SPA vs MPA (Kiến Trúc Ứng Dụng Web)</div>
+            <div class="section-intro-item">3.3 Tooling Modern (Vite, pnpm) &amp; Cấu Trúc Dự Án</div>
+            <div class="section-intro-item">3.4 Tiến Hóa Component: Class vs Function Component</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 13: React SSR vs CSR Comparison Table -->
+      <div class="slide">
+        <div class="slide-section-tag">PHẦN 3: REACT CƠ BẢN</div>
+        <h2 class="slide-title">3.1 SSR vs CSR (Nơi Render Quyết Định Tất Cả)</h2>
+
+        <table class="slide-table table-compact" style="margin-top: 14px;">
+          <thead>
+            <tr>
+              <th style="width: 22%;">Tiêu chí</th>
+              <th style="width: 39%;">SSR (Server Side Rendering)</th>
+              <th style="width: 39%;">CSR (Client Side Rendering)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>Nơi render</b></td>
+              <td>Server</td>
+              <td>Trình duyệt (Browser)</td>
+            </tr>
+            <tr>
+              <td><b>HTML ban đầu</b></td>
+              <td>Hoàn chỉnh, đầy đủ nội dung</td>
+              <td>Vỏ trống <code style="font-size: 13.5px; padding: 2px 7px;">&lt;div id="root"&gt;&lt;/div&gt;</code></td>
+            </tr>
+            <tr>
+              <td><b>Tốc độ hiển thị lần đầu (FCP)</b></td>
+              <td><span class="badge badge-green" style="padding: 3px 9px; font-size: 13px; margin-right: 6px;">Nhanh</span> HTML có sẵn từ server</td>
+              <td><span class="badge badge-amber" style="padding: 3px 9px; font-size: 13px; margin-right: 6px;">Chậm</span> Chờ JS tải &amp; chạy</td>
+            </tr>
+            <tr>
+              <td><b>Thời gian tương tác (TTI)</b></td>
+              <td>Chậm hơn FCP (chờ <b>Hydration</b>)</td>
+              <td><b>FCP = TTI</b> (Tương tác ngay khi hiện)</td>
+            </tr>
+            <tr>
+              <td><b>Tải CPU</b></td>
+              <td>Server tốn CPU (render mỗi request)</td>
+              <td>Máy người dùng tốn CPU</td>
+            </tr>
+            <tr>
+              <td><b>Bandwidth</b></td>
+              <td>Nhiều (gửi HTML đầy đủ mỗi request)</td>
+              <td>Ít hơn sau lần đầu (JS bundle tải 1 lần, sau đó chỉ gọi API JSON)</td>
+            </tr>
+            <tr>
+              <td><b>SEO</b></td>
+              <td><span class="badge badge-green" style="padding: 3px 9px; font-size: 13px; margin-right: 6px;">Tuyệt vời</span> HTML sẵn cho crawler</td>
+              <td><span class="badge badge-red" style="padding: 3px 9px; font-size: 13px; margin-right: 6px;">Kém</span> Crawler khó đọc JS-rendered content</td>
+            </tr>
+            <tr>
+              <td><b>Offline Support</b></td>
+              <td><span class="badge badge-amber" style="padding: 3px 9px; font-size: 13px; margin-right: 6px;">Không thể</span> Phụ thuộc server</td>
+              <td><span class="badge badge-green" style="padding: 3px 9px; font-size: 13px; margin-right: 6px;">Tốt</span> Có thể cache app shell &amp; data</td>
+            </tr>
+            <tr>
+              <td><b>Phù hợp cho</b></td>
+              <td>Blog, landing page, e-commerce, trang cần SEO</td>
+              <td>Dashboard, chat app, SaaS, ứng dụng interactive cao</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- SLIDE 14: SSR vs CSR Pros, Cons & Conclusion -->
+      <div class="slide">
+        <div class="slide-section-tag">PHẦN 3: REACT CƠ BẢN</div>
+        <h2 class="slide-title">3.1 SSR vs CSR: Ưu Điểm, Nhược Điểm &amp; Kết Luận</h2>
+
+        <div class="grid-2" style="gap: 24px; flex: 1;">
+          <!-- Card SSR -->
+          <div class="card" style="padding: 24px 28px; border-top: 4px solid var(--accent); display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                <div class="card-title" style="margin-bottom: 0; font-size: 20px; color: var(--accent);">SSR (Server Side Rendering)</div>
+                <span class="badge badge-blue" style="font-size: 13px; padding: 4px 14px;">Render tại Server</span>
+              </div>
+              
+              <div style="margin-bottom: 20px;">
+                <div style="font-size: 15.5px; font-weight: 800; color: #166534; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">
+                  Ưu Điểm Nổi Bật
+                </div>
+                <ul class="clean-list" style="margin-left: 2px;">
+                  <li style="margin-bottom: 10px; font-size: 15.5px; line-height: 1.6;"><b>Tốc độ hiển thị lần đầu nhanh:</b> HTML có sẵn giúp FCP tối ưu.</li>
+                  <li style="margin-bottom: 10px; font-size: 15.5px; line-height: 1.6;"><b>SEO tuyệt vời:</b> HTML đầy đủ cho crawler thu thập dữ liệu.</li>
+                  <li style="margin-bottom: 0; font-size: 15.5px; line-height: 1.6;"><b>Hiển thị tốt trên thiết bị cấu hình yếu:</b> Server gánh tải xử lý.</li>
+                </ul>
+              </div>
+
+              <div>
+                <div style="font-size: 15.5px; font-weight: 800; color: #991b1b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">
+                  Nhược Điểm Cần Chú Ý
+                </div>
+                <ul class="clean-list" style="margin-left: 2px;">
+                  <li style="margin-bottom: 10px; font-size: 15.5px; line-height: 1.6;"><b>Server chịu tải nặng:</b> 100.000 người = 100.000 lần render.</li>
+                  <li style="margin-bottom: 10px; font-size: 15.5px; line-height: 1.6;"><b>Hiện tượng Uncanny Valley:</b> Thấy nút bấm nhưng chưa tương tác được (chờ Hydration).</li>
+                  <li style="margin-bottom: 0; font-size: 15.5px; line-height: 1.6;"><b>Mỗi lần chuyển trang là round-trip đến server:</b> Tăng độ trễ mạng.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card CSR -->
+          <div class="card" style="padding: 24px 28px; border-top: 4px solid #0891b2; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                <div class="card-title" style="margin-bottom: 0; font-size: 20px; color: #0e7490;">CSR (Client Side Rendering)</div>
+                <span class="badge" style="background: #cffafe; color: #0e7490; font-size: 13px; padding: 4px 14px;">Render tại Trình duyệt</span>
+              </div>
+              
+              <div style="margin-bottom: 20px;">
+                <div style="font-size: 15.5px; font-weight: 800; color: #166534; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">
+                  Ưu Điểm Nổi Bật
+                </div>
+                <ul class="clean-list" style="margin-left: 2px;">
+                  <li style="margin-bottom: 10px; font-size: 15.5px; line-height: 1.6;"><b>UX mượt sau lần load đầu:</b> Chuyển trang tức thì không reload.</li>
+                  <li style="margin-bottom: 10px; font-size: 15.5px; line-height: 1.6;"><b>Giảm tải server:</b> Server chỉ trả static assets và xử lý API JSON.</li>
+                  <li style="margin-bottom: 0; font-size: 15.5px; line-height: 1.6;"><b>Offline Support tốt:</b> Dễ dàng cache App Shell &amp; data người dùng.</li>
+                </ul>
+              </div>
+
+              <div>
+                <div style="font-size: 15.5px; font-weight: 800; color: #991b1b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">
+                  Nhược Điểm Cần Chú Ý
+                </div>
+                <ul class="clean-list" style="margin-left: 2px;">
+                  <li style="margin-bottom: 10px; font-size: 15.5px; line-height: 1.6;"><b>Lần load đầu chậm:</b> JS bundle lớn (500KB+), cần thời gian tải &amp; parse.</li>
+                  <li style="margin-bottom: 10px; font-size: 15.5px; line-height: 1.6;"><b>SEO kém:</b> Crawler khó đọc nội dung render động từ JS.</li>
+                  <li style="margin-bottom: 0; font-size: 15.5px; line-height: 1.6;"><b>Phụ thuộc JavaScript hoàn toàn:</b> Tắt JS hoặc lỗi script là trắng trang.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Conclusion Banner -->
+        <div class="card" style="margin-top: auto; padding: 18px 26px; background: linear-gradient(135deg, #f0fdf4 0%, #eff6ff 100%); border: 1px solid #bbf7d0; border-left: 5px solid #16a34a;">
+          <div style="font-size: 15.5px; font-weight: 800; color: #166534; margin-bottom: 8px;">
+            KẾT LUẬN: KHÔNG CÓ WINNER TUYỆT ĐỐI, CHỈ CÓ ĐÚNG CONTEXT
+          </div>
+          <div style="font-size: 15px; color: var(--text-secondary); line-height: 1.65;">
+            <div>• <b>SSR thắng ở:</b> Tốc độ hiển thị ban đầu (FCP) và tối ưu SEO cho công cụ tìm kiếm.</div>
+            <div style="margin-top: 5px;">• <b>CSR thắng ở:</b> Trải nghiệm tương tác mượt mà (UX) và giảm tải chi phí hạ tầng máy chủ.</div>
+            <div style="margin-top: 5px;">• <b>Câu trả lời đúng luôn là:</b> <b>Phụ thuộc vào bài toán của bạn!</b> <i>(Xu hướng hiện đại: Kết hợp kiến trúc Hybrid Rendering như Next.js / Remix – SSR cho Landing/E-commerce, CSR cho App Dashboard/Interactive).</i></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 15: SPA vs MPA Architecture -->
+      <div class="slide">
+        <div class="slide-section-tag">PHẦN 3: REACT CƠ BẢN</div>
+        <h2 class="slide-title">3.2 SPA vs MPA (Kiến Trúc Ứng Dụng Web)</h2>
+
+        <!-- Core Notice Banner -->
+        <div style="background: #f0f7ff; border: 1px solid #bae6fd; border-left: 4px solid var(--accent); border-radius: 8px; padding: 13px 22px; margin-bottom: 16px; font-size: 15px; color: #0369a1; line-height: 1.55;">
+          <b>Lưu ý quan trọng:</b> <b>SSR / CSR</b> nói về <i>CÁCH RENDER</i> (Server hay Trình duyệt dựng HTML). Còn <b>SPA / MPA</b> nói về <i>KIẾN TRÚC ỨNG DỤNG</i>
+        </div>
+
+        <!-- SPA vs MPA Table -->
+        <table class="slide-table table-compact" style="margin-top: 0; margin-bottom: 16px; font-size: 15px;">
+          <thead>
+            <tr>
+              <th style="width: 22%; font-size: 15.5px; padding: 11px 18px;">Tiêu chí</th>
+              <th style="width: 39%; font-size: 15.5px; padding: 11px 18px;">SPA (Single Page Application)</th>
+              <th style="width: 39%; font-size: 15.5px; padding: 11px 18px;">MPA (Multi Page Application)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding: 10px 18px;"><b>Số trang HTML</b></td>
+              <td style="padding: 10px 18px;"><b>1 HTML duy nhất</b> + Client JS Router</td>
+              <td style="padding: 10px 18px;"><b>N trang HTML</b> riêng biệt từ Server</td>
+            </tr>
+            <tr>
+              <td style="padding: 10px 18px;"><b>Khi chuyển trang (vd: click "About")</b></td>
+              <td style="padding: 10px 18px;">Content fade out → fade in nội dung mới. URL đổi nhưng trang <b>KHÔNG reload</b>, giữ nguyên Shell</td>
+              <td style="padding: 10px 18px;"><b>Flash trắng toàn màn hình:</b> Trang MỚI hoàn toàn load lại từ đầu, render lại tất cả elements</td>
+            </tr>
+            <tr>
+              <td style="padding: 10px 18px;"><b>Tốc độ chuyển trang</b></td>
+              <td style="padding: 10px 18px;"><span class="badge badge-green" style="padding: 4px 10px; font-size: 13.5px; margin-right: 6px;">~50ms</span> Gần như tức thì</td>
+              <td style="padding: 10px 18px;"><span class="badge badge-red" style="padding: 4px 10px; font-size: 13.5px; margin-right: 6px;">~800ms</span> Phải chờ server response + full reload</td>
+            </tr>
+            <tr>
+              <td style="padding: 10px 18px;"><b>Cơ chế hoạt động</b></td>
+              <td style="padding: 10px 18px;">1 HTML + JS Router – Chỉ thay đổi phần cần thay đổi</td>
+              <td style="padding: 10px 18px;">N HTMLs + Server render – Mỗi trang là một request mới</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Two Cards for SPA and MPA Definition & Examples -->
+        <div class="grid-2" style="gap: 22px; margin-top: auto;">
+          <div class="card" style="padding: 20px 26px; border-top: 4px solid var(--accent); background: #f8fafc;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+              <div class="card-title" style="margin-bottom: 0; font-size: 19px; color: var(--accent);">
+                SPA (Single Page Application)
+              </div>
+              <span class="badge badge-blue" style="font-size: 12.5px; padding: 4px 12px;">1 Trang HTML</span>
+            </div>
+            <p style="font-size: 15px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 12px;">
+              Chỉ tải <b>MỘT trang HTML duy nhất</b>. Mọi điều hướng và thay đổi nội dung do JavaScript xử lý. Không reload, không flash trắng, UX mượt mà như Native App.
+            </p>
+            <div style="font-size: 14.5px; color: #1e40af; background: #eff6ff; padding: 9px 16px; border-radius: 8px;">
+              <b>Ứng dụng tiêu biểu:</b> Gmail, Figma, Notion, Facebook Web, Trello.
+            </div>
+          </div>
+
+          <div class="card" style="padding: 20px 26px; border-top: 4px solid #64748b; background: #f8fafc;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+              <div class="card-title" style="margin-bottom: 0; font-size: 19px; color: #334155;">
+                MPA (Multi Page Application)
+              </div>
+              <span class="badge" style="background: #e2e8f0; color: #475569; font-size: 12.5px; padding: 4px 12px;">N Trang HTML</span>
+            </div>
+            <p style="font-size: 15px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 12px;">
+              Kiến trúc web truyền thống. Mỗi URL là một trang HTML riêng biệt từ máy chủ. Click link đồng nghĩa với full page reload (gửi request mới, tải lại toàn bộ trang).
+            </p>
+            <div style="font-size: 14.5px; color: #334155; background: #f1f5f9; padding: 9px 16px; border-radius: 8px;">
+              <b>Ứng dụng tiêu biểu:</b> Wikipedia, Trang tin tức (BBC, VnExpress), E-commerce truyền thống.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 16: React Tooling & Architecture -->
+      <div class="slide">
+        <div class="slide-section-tag">PHẦN 3: REACT CƠ BẢN</div>
+        <h2 class="slide-title">3.3 Tooling Modern &amp; Cấu Trúc Dự Án</h2>
+
+        <div class="grid-2" style="gap: 24px; flex: 1;">
+          <!-- Left Card: Vite & pnpm -->
+          <div class="card" style="padding: 26px 30px; border-top: 4px solid var(--accent); display: flex; flex-direction: column;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+              <div class="card-title" style="margin-bottom: 0; font-size: 20px; color: var(--accent);">
+                Công Cụ Modern (Vite &amp; pnpm)
+              </div>
+              <span class="badge badge-blue" style="font-size: 12.5px; padding: 4px 12px;">Build Tool &amp; Package</span>
+            </div>
+            
+            <ul class="clean-list" style="margin-left: 2px;">
+              <li style="margin-bottom: 14px; font-size: 15.5px; line-height: 1.65;">
+                <b>React là UI Library:</b> Không phải Full-stack framework nguyên khối, tập trung chuyên sâu vào việc xây dựng View components.
+              </li>
+              <li style="margin-bottom: 14px; font-size: 15.5px; line-height: 1.65;">
+                <b>Vite:</b> Dùng Native ES Modules qua Rollup/esbuild, Dev Server khởi động tức thì (~300ms) thay vì Webpack CRA (~8s).
+              </li>
+              <li style="margin-bottom: 0; font-size: 15.5px; line-height: 1.65;">
+                <b>pnpm:</b> Cơ chế Global Store + Hard Links giúp tiết kiệm 90% dung lượng ổ đĩa và tốc độ cài đặt gói vượt trội so với npm.
+              </li>
+            </ul>
+
+            <div style="margin-top: auto; padding: 14px 18px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; font-size: 14.5px; color: #1e40af; line-height: 1.55;">
+              <b>Khuyên dùng:</b> Khởi tạo dự án hiện đại bằng Vite + pnpm để đạt hiệu suất phát triển và build tối ưu nhất.
+            </div>
+          </div>
+
+          <!-- Right Card: Mount Flow & Architecture -->
+          <div class="card" style="padding: 26px 30px; border-top: 4px solid #10b981; display: flex; flex-direction: column;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+              <div class="card-title" style="margin-bottom: 0; font-size: 20px; color: #047857;">
+                Mount Flow &amp; Cấu Trúc Thư Mục
+              </div>
+              <span class="badge badge-green" style="font-size: 12.5px; padding: 4px 12px;">Kiến Trúc Dự Án</span>
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: center; gap: 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 20px; margin-bottom: 16px; font-size: 15.5px; font-weight: 700; color: var(--accent);">
+              <code>index.html</code> <span style="color: var(--text-muted); font-size: 18px;">→</span> <code>main.jsx</code> <span style="color: var(--text-muted); font-size: 18px;">→</span> <code>App.jsx</code>
+            </div>
+
+            <ul class="clean-list" style="margin-left: 2px;">
+              <li style="margin-bottom: 14px; font-size: 15.5px; line-height: 1.65;">
+                <b>Group by Type (Dự án nhỏ):</b> Phân chia theo loại file như <code>components/</code>, <code>hooks/</code>, <code>utils/</code>, <code>services/</code>.
+              </li>
+              <li style="margin-bottom: 0; font-size: 15.5px; line-height: 1.65;">
+                <b>Group by Feature (Dự án lớn):</b> Gom theo module nghiệp vụ như <code>features/auth/</code>, <code>features/product/</code>, <code>shared/</code>.
+              </li>
+            </ul>
+
+            <div style="margin-top: auto; padding: 14px 18px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; font-size: 14.5px; color: #166534; line-height: 1.55;">
+              <b>Quy tắc scale:</b> Dự án lớn nên dùng Group by Feature để cô lập domain, giúp codebase dễ mở rộng mà không bị phân mảnh.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 17: Class vs Function Component -->
+      <div class="slide">
+        <div class="slide-section-tag">PHẦN 3: REACT CƠ BẢN</div>
+        <h2 class="slide-title">3.4 Tiến Hóa: Class vs Function Component</h2>
+
+        <div class="grid-2" style="gap: 24px; flex: 1;">
+          <!-- Class Component Card -->
+          <div class="card" style="padding: 26px 30px; border-top: 4px solid var(--danger); background: #fffdfd; display: flex; flex-direction: column;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+              <div class="card-title" style="margin-bottom: 0; font-size: 20px; color: var(--danger);">
+                Class Component
+              </div>
+              <span class="badge badge-red" style="font-size: 12.5px; padding: 4px 12px;">Legacy (Cũ)</span>
+            </div>
+            
+            <ul class="clean-list" style="margin-left: 2px;">
+              <li style="margin-bottom: 12px; font-size: 15.5px; line-height: 1.65;">
+                <b>Rắc rối với con trỏ <code>this</code>:</b> Dễ crash runtime nếu quên bind hàm thủ công trong constructor.
+              </li>
+              <li style="margin-bottom: 12px; font-size: 15.5px; line-height: 1.65;">
+                <b>Lifecycle Hell:</b> Cùng 1 logic (subscribe / cleanup) bị xé nhỏ ra 3 hàm lifecycle (<code>componentDidMount</code>, <code>componentDidUpdate</code>, <code>componentWillUnmount</code>).
+              </li>
+              <li style="margin-bottom: 12px; font-size: 15.5px; line-height: 1.65;">
+                <b>Khó tái sử dụng logic:</b> Phải dựa vào Higher-Order Components (HOC) hoặc Render Props, làm lồng ghép cây component phức tạp.
+              </li>
+              <li style="margin-bottom: 0; font-size: 15.5px; line-height: 1.65;">
+                <b>Code rườm rà (Boilerplate):</b> Tốn nhiều dòng code chỉ để khai báo class, constructor và state.
+              </li>
+            </ul>
+          </div>
+
+          <!-- Function Component Card -->
+          <div class="card" style="padding: 26px 30px; border-top: 4px solid var(--success); background: #fdfffd; display: flex; flex-direction: column;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+              <div class="card-title" style="margin-bottom: 0; font-size: 20px; color: var(--success);">
+                Function Component + Hooks
+              </div>
+              <span class="badge badge-green" style="font-size: 12.5px; padding: 4px 12px;">Modern Standard</span>
+            </div>
+
+            <ul class="clean-list" style="margin-left: 2px;">
+              <li style="margin-bottom: 12px; font-size: 15.5px; line-height: 1.65;">
+                <b>Không còn con trỏ <code>this</code>:</b> Đơn giản là JavaScript function thuần túy, nhận props và trả về JSX trực quan.
+              </li>
+              <li style="margin-bottom: 12px; font-size: 15.5px; line-height: 1.65;">
+                <b>Gom gọn logic với <code>useEffect</code>:</b> Toàn bộ logic khởi tạo, lắng nghe và dọn dẹp tài nguyên được gom gọn vào 1 hook duy nhất.
+              </li>
+              <li style="margin-bottom: 12px; font-size: 15.5px; line-height: 1.65;">
+                <b>Dễ chia sẻ bằng Custom Hooks:</b> Tách logic dùng chung thành hàm riêng biệt mà không làm thay đổi phân cấp UI.
+              </li>
+              <li style="margin-bottom: 0; font-size: 15.5px; line-height: 1.65;">
+                <b>Code ngắn hơn ~60%:</b> Rõ ràng, dễ đọc, dễ viết Unit Test và tối ưu hiệu năng bundle size.
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Takeaway Banner -->
+        <div class="card" style="margin-top: auto; padding: 16px 24px; background: #f8fafc; border: 1px solid #e2e8f0; border-left: 5px solid var(--accent); border-radius: 8px;">
+          <div style="font-size: 15px; color: var(--text-secondary); line-height: 1.6;">
+            • <b>Kết luận thực tế:</b> 100% dự án React mới ngày nay sử dụng <b>Function Component + Hooks</b>. Học Class Component chỉ phục vụ việc đọc hiểu và bảo trì các hệ thống cũ (legacy code).
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 18: Section 4 Intro / Agenda Divider Slide (Nội dung Phần 4) -->
+      <div class="slide">
+        <div class="section-intro-card">
+          <div class="section-intro-num">NỘI DUNG CHI TIẾT PHẦN 4</div>
+          <h2 class="section-intro-title">PHẦN 4: React Hooks - Hiểu Sâu Từ Bên Trong</h2>
+          <p style="font-size: 15px; color: var(--text-secondary); margin-bottom: 16px;">
+            8 Hooks cốt lõi, kiến trúc Fiber Node Linked List, bộ tứ nền tảng State &amp; Effect và các bẫy thường gặp:
+          </p>
+          
+          <div class="section-intro-list">
+            <div class="section-intro-item">4.1 Bản Chất Hooks: 8 Hooks, 1 Linked List &amp; Bộ Tứ Nền Tảng</div>
+            <div class="section-intro-item">4.2 useState - Quản Lý State, Stale Closure &amp; Lazy Initialization</div>
+            <div class="section-intro-item">4.3 useEffect - Quản Lý Side Effect, Timing &amp; Cleanup Function</div>
+            <div class="section-intro-item">4.4 useLayoutEffect - Người Anh Em Đồng Bộ Trước Paint</div>
+            <div class="section-intro-item">4.5 useReducer - Tổng Đài Điều Phối State Phức Tạp</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 19: 4.1 8 Hooks & Fiber Linked List -->
+      <div class="slide">
+        <div class="slide-section-tag">PHẦN 4: REACT HOOKS</div>
+        <h2 class="slide-title">4.1 Bản Chất Hooks: 8 Hooks, 1 Linked List &amp; Bộ Tứ Nền Tảng</h2>
+
+        <!-- Concept Notice Banner -->
+        <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-left: 5px solid var(--accent); border-radius: 8px; padding: 11px 20px; margin-bottom: 16px; font-size: 14.5px; color: #1e40af; line-height: 1.55;">
+          <b>Khái niệm:</b> Hooks là các hàm cho phép Function Component <b>gắn vào State và Vòng đời</b> của React. Toàn bộ hooks của một component được lưu trên <b>MỘT Linked List duy nhất trên Fiber Node</b> và nhận diện qua <b>thứ tự gọi</b>.
+        </div>
+
+        <div class="grid-2" style="gap: 24px; flex: 1;">
+          <!-- Left Card: Kiến trúc & Luật Hooks -->
+          <div class="card" style="padding: 22px 26px; border-top: 4px solid var(--accent); display: flex; flex-direction: column;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+              <div class="card-title" style="margin-bottom: 0; font-size: 19px; color: var(--accent);">
+                Kiến Trúc &amp; Luật Bất Biến
+              </div>
+              <span class="badge badge-blue" style="font-size: 12px; padding: 3px 10px;">8 Hooks Cốt Lõi</span>
+            </div>
+
+            <ul class="clean-list" style="margin-left: 2px;">
+              <li style="margin-bottom: 12px; font-size: 15px; line-height: 1.6;">
+                <b>8 Hooks cơ bản:</b> <code>useState</code>, <code>useEffect</code>, <code>useLayoutEffect</code>, <code>useReducer</code>, <code>useMemo</code>, <code>useCallback</code>, <code>useContext</code>, <code>useRef</code>.
+              </li>
+              <li style="margin-bottom: 12px; font-size: 15px; line-height: 1.6;">
+                <b>Quy tắc tối thượng:</b> Chỉ gọi hook ở top-level của component; tuyệt đối <b>không đặt trong <code>if/else</code>, vòng lặp hay hàm lồng</b>.
+              </li>
+              <li style="margin-bottom: 0; font-size: 15px; line-height: 1.6;">
+                <b>Nguyên nhân:</b> Gọi sai thứ tự sẽ làm lệch con trỏ Linked List trên Fiber Node → Đọc sai ô nhớ state → Crash ứng dụng.
+              </li>
+            </ul>
+
+            <div style="margin-top: auto; padding: 10px 14px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; font-size: 13.5px; color: #1e40af;">
+              <b>Công cụ:</b> Luôn dùng <code>eslint-plugin-react-hooks</code> để tự động phát hiện vi phạm thứ tự gọi.
+            </div>
+          </div>
+
+          <!-- Right Card: Bộ Tứ Nền Tảng -->
+          <div class="card" style="padding: 22px 26px; border-top: 4px solid #10b981; display: flex; flex-direction: column;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+              <div class="card-title" style="margin-bottom: 0; font-size: 19px; color: #047857;">
+                Bộ Tứ Nền Tảng (State &amp; Effect)
+              </div>
+              <span class="badge badge-green" style="font-size: 12px; padding: 3px 10px;">Core Foundation</span>
+            </div>
+
+            <ul class="clean-list" style="margin-left: 2px;">
+              <li style="margin-bottom: 12px; font-size: 15px; line-height: 1.6;">
+                <b>1. useState:</b> Khởi tạo &amp; lưu State nội bộ đơn giản, kích hoạt re-render UI.
+              </li>
+              <li style="margin-bottom: 12px; font-size: 15px; line-height: 1.6;">
+                <b>2. useEffect:</b> Xử lý Side Effect (API, timer, event) bất đồng bộ sau Paint.
+              </li>
+              <li style="margin-bottom: 12px; font-size: 15px; line-height: 1.6;">
+                <b>3. useLayoutEffect:</b> Đo đạc &amp; sửa DOM đồng bộ trước Paint để chặn nháy hình (flicker).
+              </li>
+              <li style="margin-bottom: 0; font-size: 15px; line-height: 1.6;">
+                <b>4. useReducer:</b> Quản lý State phức tạp tập trung theo mô hình Action/Reducer.
+              </li>
+            </ul>
+
+            <div style="margin-top: auto; padding: 10px 14px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; font-size: 13.5px; color: #166534;">
+              <b>Trọng tâm:</b> Làm chủ bộ tứ này là nắm chắc 90% logic vận hành của React.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 20: 4.2 useState -->
+      <div class="slide">
+        <div class="slide-section-tag">PHẦN 4: REACT HOOKS</div>
+        <h2 class="slide-title">4.2 useState - Quản Lý Trạng Thái (State) Nội Bộ</h2>
+
+        <!-- Concept Notice Banner -->
+        <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-left: 5px solid var(--accent); border-radius: 8px; padding: 10px 18px; margin-bottom: 14px; font-size: 14px; color: #1e40af; line-height: 1.55;">
+          <b>Khái niệm:</b> <code>useState</code> dùng để <b>lưu trữ và cập nhật dữ liệu động (State)</b> bên trong Function Component.<br>
+          Khi State thay đổi, React tự động <b>kích hoạt Re-render</b> để cập nhật UI.<br>
+          <b>Cú pháp:</b> <code>const [state, setState] = useState(initialValue);</code>
+        </div>
+
+        <div class="grid-2" style="gap: 24px; flex: 1;">
+          <!-- Left Card: Bẫy Stale Closure & Functional Update -->
+          <div class="card" style="padding: 22px 26px; border-top: 4px solid var(--accent); display: flex; flex-direction: column;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+              <div class="card-title" style="margin-bottom: 0; font-size: 19px; color: var(--accent);">
+                Stale Closure &amp; Functional Update
+              </div>
+              <span class="badge badge-blue" style="font-size: 12px; padding: 3px 10px;">Cập Nhật An Toàn</span>
+            </div>
+
+            <ul class="clean-list" style="margin-left: 2px;">
+              <li style="margin-bottom: 12px; font-size: 15px; line-height: 1.6;">
+                <b>Bẫy Stale Closure:</b> Gọi <code>setCount(count + 1)</code> 3 lần liên tiếp vẫn chỉ tăng 1, vì biến <code>count</code> bị "đóng băng" ở snapshot render hiện tại.
+              </li>
+              <li style="margin-bottom: 12px; font-size: 15px; line-height: 1.6;">
+                <b>Functional Update:</b> Luôn dùng <code>setCount(prev =&gt; prev + 1)</code> khi state mới tính từ state cũ để luôn lấy giá trị mới nhất.
+              </li>
+              <li style="margin-bottom: 0; font-size: 15px; line-height: 1.6;">
+                <b>Batching (React 18):</b> React tự động gom nhiều lần <code>setState</code> trong cùng tick thành duy nhất 1 lần re-render để tối ưu hiệu năng.
+              </li>
+            </ul>
+
+            <div style="margin-top: auto; padding: 10px 14px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; font-size: 13.5px; color: #1e40af;">
+              <b>Quy tắc:</b> State mới phụ thuộc state cũ → Luôn dùng hàm callback <code>prev =&gt; ...</code>.
+            </div>
+          </div>
+
+          <!-- Right Card: Lazy Initialization -->
+          <div class="card" style="padding: 22px 26px; border-top: 4px solid #f59e0b; display: flex; flex-direction: column;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+              <div class="card-title" style="margin-bottom: 0; font-size: 19px; color: #b45309;">
+                Lazy Initialization (Khởi Tạo Lười)
+              </div>
+              <span class="badge badge-amber" style="font-size: 12px; padding: 3px 10px;">Tối Ưu Hiệu Năng</span>
+            </div>
+
+            <ul class="clean-list" style="margin-left: 2px;">
+              <li style="margin-bottom: 12px; font-size: 15px; line-height: 1.6;">
+                <b>Vấn đề:</b> <code>useState(expensiveCalc())</code> khiến hàm tính toán bị gọi lại ở <b>MỌI lần re-render</b> (lãng phí CPU).
+              </li>
+              <li style="margin-bottom: 12px; font-size: 15px; line-height: 1.6;">
+                <b>Giải pháp:</b> <code>useState(() =&gt; expensiveCalc())</code> truyền callback để React <b>chỉ gọi 1 lần duy nhất khi Mount</b>.
+              </li>
+              <li style="margin-bottom: 0; font-size: 15px; line-height: 1.6;">
+                <b>Ứng dụng thực tế:</b> Đọc dữ liệu từ <code>localStorage</code>, parse JSON dung lượng lớn, hoặc tạo cấu trúc mảng ban đầu.
+              </li>
+            </ul>
+
+            <div style="margin-top: auto; padding: 10px 14px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; font-size: 13.5px; color: #92400e;">
+              <b>Quy tắc:</b> Giá trị khởi tạo tốn tài nguyên → Luôn bọc trong hàm <code>() =&gt; compute()</code>.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 21: 4.3 useEffect -->
+      <div class="slide">
+        <div class="slide-section-tag">PHẦN 4: REACT HOOKS</div>
+        <h2 class="slide-title">4.3 useEffect - Quản Lý Tác Vụ Phụ (Side Effect)</h2>
+
+        <!-- Concept Notice Banner -->
+        <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-left: 5px solid var(--accent); border-radius: 8px; padding: 10px 18px; margin-bottom: 14px; font-size: 14px; color: #1e40af; line-height: 1.55;">
+          <b>Khái niệm:</b> <code>useEffect</code> dùng để <b>đồng bộ component với các hệ thống bên ngoài (Side Effect)</b> như gọi API, lắng nghe event, Timer, thao tác DOM.<br>
+          <b>Cơ chế:</b> Chạy <b>bất đồng bộ SAU KHI trình duyệt đã vẽ UI (After Paint)</b> để không chặn giao diện.
+        </div>
+
+        <div class="grid-2" style="gap: 24px; flex: 1;">
+          <!-- Left Card: Dependency Array -->
+          <div class="card" style="padding: 22px 26px; border-top: 4px solid var(--accent); display: flex; flex-direction: column;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+              <div class="card-title" style="margin-bottom: 0; font-size: 19px; color: var(--accent);">
+                Dependency Array (Kiểm Soát Vòng Đời)
+              </div>
+              <span class="badge badge-blue" style="font-size: 12px; padding: 3px 10px;">Khi Nào Chạy?</span>
+            </div>
+
+            <ul class="clean-list" style="margin-left: 2px;">
+              <li style="margin-bottom: 12px; font-size: 15px; line-height: 1.6;">
+                <b>Không truyền mảng <code>useEffect(fn)</code>:</b> Chạy lại sau <b>mọi lần render</b> của component.
+              </li>
+              <li style="margin-bottom: 12px; font-size: 15px; line-height: 1.6;">
+                <b>Mảng rỗng <code>useEffect(fn, [])</code>:</b> Chỉ chạy <b>1 lần duy nhất khi Mount</b> (tương tự <code>componentDidMount</code>).
+              </li>
+              <li style="margin-bottom: 0; font-size: 15px; line-height: 1.6;">
+                <b>Có dependencies <code>useEffect(fn, [deps])</code>:</b> Chỉ chạy lại khi có ít nhất 1 dependency thay đổi (so sánh <code>Object.is</code>).
+              </li>
+            </ul>
+
+            <div style="margin-top: auto; padding: 10px 14px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; font-size: 13.5px; color: #1e40af;">
+              <b>Lưu ý:</b> React 18 Strict Mode cố ý mount 2 lần ở môi trường Dev để phát hiện rò rỉ bộ nhớ.
+            </div>
+          </div>
+
+          <!-- Right Card: Cleanup Function -->
+          <div class="card" style="padding: 22px 26px; border-top: 4px solid #10b981; display: flex; flex-direction: column;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+              <div class="card-title" style="margin-bottom: 0; font-size: 19px; color: #047857;">
+                Cleanup Function (Dọn Dẹp Bộ Nhớ)
+              </div>
+              <span class="badge badge-green" style="font-size: 12px; padding: 3px 10px;">Tránh Memory Leak</span>
+            </div>
+
+            <ul class="clean-list" style="margin-left: 2px;">
+              <li style="margin-bottom: 12px; font-size: 15px; line-height: 1.6;">
+                <b>Cú pháp:</b> Trả về một hàm dọn dẹp: <code>return () =&gt; { /* hủy tác vụ */ };</code>
+              </li>
+              <li style="margin-bottom: 12px; font-size: 15px; line-height: 1.6;">
+                <b>Thời điểm thực thi:</b> Chạy ngay trước effect kế tiếp và khi component <b>Unmount khỏi DOM</b>.
+              </li>
+              <li style="margin-bottom: 0; font-size: 15px; line-height: 1.6;">
+                <b>Nhiệm vụ bắt buộc:</b> Hủy <code>clearInterval</code>, gỡ <code>removeEventListener</code>, ngắt WebSocket, abort fetch request.
+              </li>
+            </ul>
+
+            <div style="margin-top: auto; padding: 10px 14px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; font-size: 13.5px; color: #166534;">
+              <b>Quy tắc:</b> Mở kết nối / timer trong effect thì <b>BẮT BUỘC</b> phải dọn dẹp trong hàm return.
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- SLIDE 22: 4.4 useLayoutEffect -->
+      <div class="slide">
+        <div class="slide-section-tag">PHẦN 4: REACT HOOKS</div>
+        <h2 class="slide-title">4.4 useLayoutEffect - Xử Lý DOM Đồng Bộ Trước Khi Paint</h2>
+
+        <!-- Concept Notice Banner -->
+        <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-left: 5px solid var(--accent); border-radius: 8px; padding: 10px 18px; margin-bottom: 14px; font-size: 14px; color: #1e40af; line-height: 1.55;">
+          <b>Khái niệm:</b> <code>useLayoutEffect</code> chạy <b>ĐỒNG BỘ sau khi DOM cập nhật nhưng TRƯỚC KHI trình duyệt vẽ (Before Paint)</b>.<br>
+          Chặn browser vẽ để đọc/sửa DOM ngay lập tức nhằm <b>triệt tiêu hoàn toàn hiện tượng nháy hình (Flicker)</b>.
+        </div>
+
+        <div class="grid-2" style="gap: 24px; flex: 1;">
+          <!-- Left Card: So sánh -->
+          <div class="card" style="padding: 22px 26px; border-top: 4px solid var(--accent); display: flex; flex-direction: column;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+              <div class="card-title" style="margin-bottom: 0; font-size: 19px; color: var(--accent);">
+                So Sánh: useEffect vs useLayoutEffect
+              </div>
+              <span class="badge badge-blue" style="font-size: 12px; padding: 3px 10px;">Chặn Vẽ UI</span>
+            </div>
+
+            <table class="slide-table table-compact" style="margin-top: 0; margin-bottom: 12px; font-size: 14px;">
+              <thead>
+                <tr>
+                  <th style="padding: 8px 12px;">Tiêu chí</th>
+                  <th style="padding: 8px 12px;">useEffect</th>
+                  <th style="padding: 8px 12px;">useLayoutEffect</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="padding: 8px 12px;"><b>Thời điểm</b></td>
+                  <td style="padding: 8px 12px;">SAU Paint (Async)</td>
+                  <td style="padding: 8px 12px;">TRƯỚC Paint (Sync)</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 12px;"><b>Chặn UI</b></td>
+                  <td style="padding: 8px 12px;">Không chặn browser</td>
+                  <td style="padding: 8px 12px;">Chặn browser vẽ</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 12px;"><b>Ứng dụng</b></td>
+                  <td style="padding: 8px 12px;">API, timer, event</td>
+                  <td style="padding: 8px 12px;">Đo DOM, scroll, layout</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div style="margin-top: auto; padding: 10px 14px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; font-size: 13.5px; color: #1e40af;">
+              <b>Quy tắc:</b> 99% tác vụ dùng <code>useEffect</code>. Chỉ dùng <code>useLayoutEffect</code> khi người dùng thấy layout bị giật nảy.
+            </div>
+          </div>
+
+          <!-- Right Card: 3 Kịch Bản -->
+          <div class="card" style="padding: 22px 26px; border-top: 4px solid #10b981; display: flex; flex-direction: column;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+              <div class="card-title" style="margin-bottom: 0; font-size: 19px; color: #047857;">
+                3 Kịch Bản Sử Dụng Thực Tế
+              </div>
+              <span class="badge badge-green" style="font-size: 12px; padding: 3px 10px;">Thực Tiễn</span>
+            </div>
+
+            <ul class="clean-list" style="margin-left: 2px;">
+              <li style="margin-bottom: 10px; font-size: 14.5px; line-height: 1.55;">
+                <b>1. Đo đạc DOM:</b> Đo chiều cao container cho Virtual Scroll hoặc đo kích thước Tooltip để căn vị trí không tràn viewport.
+              </li>
+              <li style="margin-bottom: 10px; font-size: 14.5px; line-height: 1.55;">
+                <b>2. Đồng bộ vị trí Scroll:</b> Reset <code>scrollTop = 0</code> ngay tức thì khi chuyển trang để tránh bị nảy khung hình.
+              </li>
+              <li style="margin-bottom: 10px; font-size: 14.5px; line-height: 1.55;">
+                <b>3. Khởi tạo Animation:</b> Thiết lập vị trí/opacity ban đầu trước khi vẽ (tránh Flash of Unstyled Content).
+              </li>
+              <li style="margin-bottom: 0; font-size: 14.5px; line-height: 1.55;">
+                <b>Lưu ý SSR:</b> Trên Next.js/SSR cần dùng <code>useIsomorphicLayoutEffect</code> để tránh cảnh báo lỗi server.
+              </li>
+            </ul>
+
+            <div style="margin-top: auto; padding: 10px 14px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; font-size: 13.5px; color: #991b1b;">
+              <b>Cảnh báo:</b> Không gọi API hay tính toán nặng trong <code>useLayoutEffect</code> vì sẽ làm đơ giao diện.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 23: 4.5 useReducer -->
+      <div class="slide">
+        <div class="slide-section-tag">PHẦN 4: REACT HOOKS</div>
+        <h2 class="slide-title">4.5 useReducer - Quản Lý Trạng Thái Phức Tạp Tập Trung</h2>
+
+        <!-- Concept Notice Banner -->
+        <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-left: 5px solid var(--accent); border-radius: 8px; padding: 10px 18px; margin-bottom: 14px; font-size: 14px; color: #1e40af; line-height: 1.55;">
+          <b>Khái niệm:</b> <code>useReducer</code> dùng để <b>quản lý State phức tạp hoặc nhiều state phụ thuộc nhau</b> thông qua một hàm Reducer tập trung duy nhất theo mô hình: <code>(state, action) =&gt; newState</code>.<br>
+          <b>Cú pháp:</b> <code>const [state, dispatch] = useReducer(reducer, initialArg);</code>
+        </div>
+
+        <div class="grid-2" style="gap: 24px; flex: 1;">
+          <!-- Left Card: 3 Nguyên Tắc Của Reducer -->
+          <div class="card" style="padding: 22px 26px; border-top: 4px solid var(--accent); display: flex; flex-direction: column;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+              <div class="card-title" style="margin-bottom: 0; font-size: 19px; color: var(--accent);">
+                Cơ Chế &amp; 3 Nguyên Tắc Reducer
+              </div>
+              <span class="badge badge-blue" style="font-size: 12px; padding: 3px 10px;">Hàm Thuần Túy</span>
+            </div>
+
+            <ul class="clean-list" style="margin-left: 2px;">
+              <li style="margin-bottom: 10px; font-size: 14.5px; line-height: 1.55;">
+                <b>Cơ chế hoạt động:</b> Component chỉ gửi hành động qua <code>dispatch(action)</code>, toàn bộ logic biến đổi state do Reducer quyết định.
+              </li>
+              <li style="margin-bottom: 10px; font-size: 14.5px; line-height: 1.55;">
+                <b>1. Pure Function:</b> Cùng input (state + action) luôn trả về cùng 1 output duy nhất, không ngẫu nhiên.
+              </li>
+              <li style="margin-bottom: 10px; font-size: 14.5px; line-height: 1.55;">
+                <b>2. Immutability Tuyệt Đối:</b> Không mutate state cũ (không <code>push</code>/<code>splice</code>), luôn tạo object/array mới.
+              </li>
+              <li style="margin-bottom: 0; font-size: 14.5px; line-height: 1.55;">
+                <b>3. Không Side Effect:</b> Tuyệt đối không gọi API, timer hay can thiệp DOM bên trong reducer.
+              </li>
+            </ul>
+
+            <div style="margin-top: auto; padding: 10px 14px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; font-size: 13.5px; color: #1e40af;">
+              <b>Stable Reference:</b> Hàm <code>dispatch</code> không bao giờ đổi địa chỉ bộ nhớ qua các render.
+            </div>
+          </div>
+
+          <!-- Right Card: useState vs useReducer -->
+          <div class="card" style="padding: 22px 26px; border-top: 4px solid #10b981; display: flex; flex-direction: column;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+              <div class="card-title" style="margin-bottom: 0; font-size: 19px; color: #047857;">
+                Khi Nào Dùng useState vs useReducer?
+              </div>
+              <span class="badge badge-green" style="font-size: 12px; padding: 3px 10px;">Lựa Chọn Đúng</span>
+            </div>
+
+            <ul class="clean-list" style="margin-left: 2px;">
+              <li style="margin-bottom: 12px; font-size: 14.5px; line-height: 1.55;">
+                <b>Chọn useState khi:</b> State đơn giản, độc lập (1-3 biến: boolean toggle, input string, counter).
+              </li>
+              <li style="margin-bottom: 12px; font-size: 14.5px; line-height: 1.55;">
+                <b>Chọn useReducer khi:</b> Nhiều state phụ thuộc nhau (ví dụ: <code>data</code>, <code>isLoading</code>, <code>error</code>), form phức tạp, CRUD danh sách.
+              </li>
+              <li style="margin-bottom: 0; font-size: 14.5px; line-height: 1.55;">
+                <b>Dễ Unit Test:</b> Tách 100% logic cập nhật ra khỏi component UI → Viết test cho reducer cực kỳ đơn giản.
+              </li>
+            </ul>
+
+            <div style="margin-top: auto; padding: 10px 14px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; font-size: 13.5px; color: #166534;">
+              <b>Quy tắc:</b> State độc lập → <code>useState</code>. State chùm, phụ thuộc lẫn nhau → <code>useReducer</code>.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 24: Summary Slide -->
+      <div class="slide">
+        <div class="title-slide-content" style="width: 100%; height: 100%; padding: 36px 48px;">
+          <div class="slide-section-tag">TỔNG KẾT SLIDE DECK</div>
+          <h2 style="font-size: 32px; font-weight: 800; color: var(--text-primary); margin-bottom: 24px;">4 Trụ Cột Nền Tảng Đã Học</h2>
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; width: 100%; max-width: 1320px; margin: 0 auto; text-align: left;">
+            <div class="card" style="padding: 22px 20px; border-top: 4px solid var(--accent); border-radius: 12px; background: #f8fafc;">
+              <h4 style="color: var(--accent); font-size: 18px; font-weight: 800; margin-bottom: 10px;">1. JS &amp; Web Core</h4>
+              <p style="font-size: 14px; color: var(--text-secondary); line-height: 1.6;">URL 9 thành phần, DNS (Root, TLD, Auth), Web Render Pipeline, Event Loop &amp; Immutability.</p>
+            </div>
+            <div class="card" style="padding: 22px 20px; border-top: 4px solid var(--success); border-radius: 12px; background: #f8fafc;">
+              <h4 style="color: var(--success); font-size: 18px; font-weight: 800; margin-bottom: 10px;">2. Type Safety</h4>
+              <p style="font-size: 14px; color: var(--text-secondary); line-height: 1.6;">Chuyển lỗi Runtime sang Compile Time với TypeScript, Generic &amp; Interface/Type.</p>
+            </div>
+            <div class="card" style="padding: 22px 20px; border-top: 4px solid var(--warning); border-radius: 12px; background: #f8fafc;">
+              <h4 style="color: #d97706; font-size: 18px; font-weight: 800; margin-bottom: 10px;">3. React Engine</h4>
+              <p style="font-size: 14px; color: var(--text-secondary); line-height: 1.6;">SSR vs CSR, SPA vs MPA, Tooling hiện đại (Vite + pnpm) &amp; Class vs Function Component.</p>
+            </div>
+            <div class="card" style="padding: 22px 20px; border-top: 4px solid #7c3aed; border-radius: 12px; background: #f8fafc;">
+              <h4 style="color: #7c3aed; font-size: 18px; font-weight: 800; margin-bottom: 10px;">4. React Hooks</h4>
+              <p style="font-size: 14px; color: var(--text-secondary); line-height: 1.6;">Fiber Linked List, Bộ tứ State &amp; Effect (useState, useEffect, useLayoutEffect, useReducer).</p>
+            </div>
+          </div>
+          <p style="font-size: 16px; font-weight: 600; color: var(--text-muted); margin-top: 28px;">Cảm ơn bạn đã theo dõi bài trình bày!</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom Footer Navigation -->
+    <div class="deck-footer">
+      <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">
+        Trang Trước
+      </button>
+      
+      <div style="display: flex; gap: 8px;">
+        <button class="nav-btn" onclick="toggleFullscreen()">
+          Toàn Màn Hình
+        </button>
+      </div>
+
+      <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">
+        Trang Sau
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const progressBar = document.getElementById('progressBar');
+    const slideCounter = document.getElementById('slideCounter');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function updateDeck() {
+      slides.forEach((slide, index) => {
+        if (index === currentSlide) {
+          slide.classList.add('active');
+        } else {
+          slide.classList.remove('active');
+        }
+      });
+
+      // Update progress bar
+      const progressPercent = ((currentSlide + 1) / totalSlides) * 100;
+      progressBar.style.width = `${progressPercent}%`;
+
+      // Update Counter
+      slideCounter.textContent = `Slide ${currentSlide + 1} / ${totalSlides}`;
+
+      // Update buttons state
+      prevBtn.disabled = currentSlide === 0;
+      nextBtn.disabled = currentSlide === totalSlides - 1;
+    }
+
+    function changeSlide(direction) {
+      currentSlide += direction;
+      if (currentSlide < 0) currentSlide = 0;
+      if (currentSlide >= totalSlides) currentSlide = totalSlides - 1;
+      updateDeck();
+    }
+
+    // Keyboard Arrow Navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'Space') {
+        changeSlide(1);
+      } else if (e.key === 'ArrowLeft') {
+        changeSlide(-1);
+      }
+    });
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    // Initialize
+    updateDeck();
+  </script>
+</body>
+</html>
